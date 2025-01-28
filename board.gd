@@ -25,7 +25,7 @@ var board_state : Array = []
 var checkers : Array = []
 var selected_checkers : Array = []
 var light_effects: Array = []
-var roll_values: Vector2i = Vector2i(1, 1)
+var roll_values: Array = [1, 1]
 var moves: Dictionary = {}
 
 # Called when the node enters the scene tree for the first time.
@@ -126,12 +126,14 @@ func _input(event):
 func update_selection(tile_id: int) -> void:
 	clear_selection()
 	select_checkers(tile_id)
-	moves = find_possible_moves(tile_id, roll_values.x, roll_values.y)
+	moves = find_possible_moves_v2(tile_id, roll_values)
 	update_possible_moves(moves)
+
 	
 func play_move(to: int) -> void:
 	used_dice.emit(moves[to][1])
 	board_state = moves[to][0]
+	roll_values = moves[to][2]
 	clear_selection()
 	update_graphics()
 
@@ -154,43 +156,76 @@ func select_checkers(tile_id: int) -> void:
 			
 
 # Function to find possible moves from a given tile_id based on two dice rolls
-func find_possible_moves(tile_id: int, die1: int, die2: int) -> Dictionary:
+#func find_possible_moves(tile_id: int, die1: int, die2: int) -> Dictionary:
+	#var possible_moves: Dictionary = {}
+#
+	## Get the color of the checker on the current tile
+	#var checker_count: int = board_state[tile_id]
+#
+	#if checker_count == 0:
+		## No checker on the tile, so no moves possible.
+		#return possible_moves
+#
+	#var dice_sum = die1 + die2
+	## If doubles, repeat the roll 4 times
+	#var is_double: bool = die1 == die2
+#
+	#if not is_double:
+		#var d1_valid: bool = is_move_valid(tile_id, die1)
+		#var d2_valid: bool = is_move_valid(tile_id, die2)
+		#if d1_valid:
+			#add_move(possible_moves,board_state, tile_id, [die1])
+		#if d2_valid:
+			#add_move(possible_moves,board_state, tile_id, [die2])
+		### we need to check for the existence of a path
+		#if (d1_valid or d2_valid) and is_move_valid(tile_id, dice_sum):
+			#add_move(possible_moves,board_state, tile_id, [die1, die2])
+	#
+	## Handle the case where dice are doubles
+	#else:
+		#var dice_used: Array = []
+		#for i in range(1, 5):
+			## if any move is not valid, then the next one
+			## wont be since the previous is required
+			#if not is_move_valid(tile_id, die1 * i):
+				#break
+			#dice_used.push_back(die1)
+			#add_move(possible_moves, board_state, tile_id, dice_used.duplicate())
+			#
+	#return possible_moves
+
+func find_possible_moves_v2(tile_id: int, rolls: Array) -> Dictionary:
+	assert (not roll_values.has(0))
 	var possible_moves: Dictionary = {}
-
-	# Get the color of the checker on the current tile
-	var checker_count: int = board_state[tile_id]
-
-	if checker_count == 0:
-		# No checker on the tile, so no moves possible.
-		return possible_moves
-
-	var dice_sum = die1 + die2
-	# If doubles, repeat the roll 4 times
-	var is_double: bool = die1 == die2
-
-	if not is_double:
-		var d1_valid: bool = is_move_valid(tile_id, die1)
-		var d2_valid: bool = is_move_valid(tile_id, die2)
-		if d1_valid:
-			add_move(possible_moves,board_state, tile_id, [die1])
-		if d2_valid:
-			add_move(possible_moves,board_state, tile_id, [die2])
-		## we need to check for the existence of a path
-		if (d1_valid or d2_valid) and is_move_valid(tile_id, dice_sum):
-			add_move(possible_moves,board_state, tile_id, [die1, die2])
-	
-	# Handle the case where dice are doubles
-	else:
-		var dice_used: Array = []
-		for i in range(1, 5):
-			# if any move is not valid, then the next one
-			# wont be since the previous is required
-			if not is_move_valid(tile_id, die1 * i):
-				break
-			dice_used.push_back(die1)
-			add_move(possible_moves, board_state, tile_id, dice_used.duplicate())
-			
+	var rolls_copy: Array = rolls.duplicate()
+	recursive_move_search(tile_id, 0, possible_moves, rolls_copy, [], [])
 	return possible_moves
+	
+func recursive_move_search(origin: int, current: int, possible_moves: Dictionary, 
+	rolls: Array, remaining_rolls: Array, used_rolls: Array) -> void:
+	if rolls.is_empty():
+		if not used_rolls.is_empty():
+			add_move(possible_moves, board_state, origin, 
+			used_rolls.duplicate(), remaining_rolls.duplicate())
+		return
+		
+	for i in range(rolls.size()):
+		var roll: int = rolls[i]
+		var new_rolls: Array = rolls.duplicate()
+		new_rolls.pop_at(i)
+		var new_remaining_rolls = remaining_rolls.duplicate()
+		new_remaining_rolls.push_back(roll)
+		
+		# Skip the move
+		recursive_move_search(origin, current, possible_moves, new_rolls, 
+		new_remaining_rolls, used_rolls)
+		
+		# Or add it
+		if is_move_valid(origin, roll + current):
+			var new_used_rolls = used_rolls.duplicate()
+			new_used_rolls.push_back(roll)
+			recursive_move_search(origin, current + roll, possible_moves, 
+			new_rolls, remaining_rolls, new_used_rolls)
 	
 func is_move_valid(from: int, step: int) -> bool:
 	var checker_count = board_state[from]
@@ -219,17 +254,18 @@ func update_possible_moves(moves: Dictionary) -> void:
 		light_effects.push_back(light)
 
 
-func _on_die_set_dice_result(d1: int, d2: int) -> void:
+func _on_die_set_dice_result(rolls: Array) -> void:
 	clear_selection()
-	roll_values = Vector2i(d1, d2)
+	roll_values = rolls.duplicate()
 
-func add_move(possible_moves: Dictionary, board: Array, from: int, steps: Array) -> void:
+func add_move(possible_moves: Dictionary, board: Array, from: int, 
+	steps: Array, remaining_rolls: Array) -> void:
 	var step: int = steps.reduce(func(accum, number): return accum + number, 0)
 	var checker_count = board_state[from]
 	var move_direction = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
 	var target_tile = from + step * move_direction
 	var new_board: Array = compute_move(board, from, target_tile) 
-	possible_moves[target_tile] = [new_board, steps]
+	possible_moves[target_tile] = [new_board, steps, remaining_rolls]
 
 # this functions assumes the move is valid
 func compute_move(board: Array, from: int, to: int) -> Array:

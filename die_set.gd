@@ -1,6 +1,6 @@
 extends Node2D
 
-signal dice_result(d1: int, d2: int)
+signal dice_result(Array)
 
 
 @export var used_color: Color
@@ -45,7 +45,7 @@ func _on_timer_timeout() -> void:
 	$Die2.stop()
 	$Die2.frame = result2 - 1
 	if result1 != result2:
-		roll_values = [result1, result2, 0, 0]
+		roll_values = [result1, result2]
 	else:
 		roll_values = [result1, result1, result1, result1]
 		$Die3.show()
@@ -53,7 +53,7 @@ func _on_timer_timeout() -> void:
 		$Die4.show()
 		$Die4.frame = result1 - 1
 		position += four_dice_offset
-	dice_result.emit(result1, result2)
+	dice_result.emit(roll_values)
 	
 
 
