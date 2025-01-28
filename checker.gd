@@ -1,4 +1,5 @@
 extends Node2D
+class_name Checker
 
 var is_white : bool = true
 var tile_id: int = -1

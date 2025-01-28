@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://main.gd" id="1_46kha"]
 [ext_resource type="PackedScene" uid="uid://h0cm7y6ly6bh" path="res://board.tscn" id="1_m6jjh"]
 [ext_resource type="Texture2D" uid="uid://cr58w4j6k0m4n" path="res://img/background2.jpg" id="3_wufsu"]
-[ext_resource type="PackedScene" uid="uid://chlm3x8aew8b6" path="res://die_set.tscn" id="4_2qb2t"]
+[ext_resource type="PackedScene" uid="uid://chlm3x8aew8b6" path="res://dice_set.tscn" id="4_2qb2t"]
 [ext_resource type="PackedScene" uid="uid://cblvobknfqofx" path="res://roll.tscn" id="6_oreuy"]
 
 [node name="Main" type="Node"]
@@ -41,7 +41,7 @@ layout_mode = 2
 custom_minimum_size = Vector2(0, 400)
 layout_mode = 2
 
-[node name="DieSet" parent="MarginContainer/VBoxContainer/DiceSpace" instance=ExtResource("4_2qb2t")]
+[node name="DiceSet" parent="MarginContainer/VBoxContainer/DiceSpace" instance=ExtResource("4_2qb2t")]
 position = Vector2(97, 125)
 scale = Vector2(0.598, 0.6)
 
@@ -49,6 +49,6 @@ scale = Vector2(0.598, 0.6)
 layout_mode = 2
 size_flags_horizontal = 4
 
-[connection signal="used_dice" from="Board" to="MarginContainer/VBoxContainer/DiceSpace/DieSet" method="_on_board_used_dice"]
-[connection signal="dice_result" from="MarginContainer/VBoxContainer/DiceSpace/DieSet" to="Board" method="_on_die_set_dice_result"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/Roll" to="MarginContainer/VBoxContainer/DiceSpace/DieSet" method="_on_roll_pressed"]
+[connection signal="used_dice" from="Board" to="MarginContainer/VBoxContainer/DiceSpace/DiceSet" method="_on_board_used_dice"]
+[connection signal="dice_result" from="MarginContainer/VBoxContainer/DiceSpace/DiceSet" to="Board" method="_on_dice_set_dice_result"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Roll" to="MarginContainer/VBoxContainer/DiceSpace/DiceSet" method="_on_roll_pressed"]

@@ -1,4 +1,5 @@
 extends Node2D
+class_name Board
 
 signal used_dice(dice: Array)
 
@@ -254,7 +255,7 @@ func update_possible_moves(moves: Dictionary) -> void:
 		light_effects.push_back(light)
 
 
-func _on_die_set_dice_result(rolls: Array) -> void:
+func _on_dice_set_dice_result(rolls: Array) -> void:
 	clear_selection()
 	roll_values = rolls.duplicate()
 
