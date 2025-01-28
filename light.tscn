@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dsbulfoj377qp"]
+
+[ext_resource type="Texture2D" uid="uid://c430nj55g7e66" path="res://img/light.png" id="1_tn0vb"]
+
+[node name="Light" type="Sprite2D"]
+scale = Vector2(3, 3)
+texture = ExtResource("1_tn0vb")
+offset = Vector2(0, -45)

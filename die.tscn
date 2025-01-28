@@ -1,0 +1,68 @@
+[gd_scene load_steps=14 format=3 uid="uid://cxjyffl36yto7"]
+
+[ext_resource type="Texture2D" uid="uid://bbd5m40bnegg2" path="res://img/Dice/diceMagenta1.png" id="1_qiprr"]
+[ext_resource type="Texture2D" uid="uid://cayex8se1dcu5" path="res://img/Dice/diceMagenta2.png" id="2_7kbeg"]
+[ext_resource type="Texture2D" uid="uid://dj50pto35j0np" path="res://img/Dice/diceMagenta3.png" id="3_hmj1a"]
+[ext_resource type="Texture2D" uid="uid://catbbkklm015c" path="res://img/Dice/diceMagenta4.png" id="4_seml7"]
+[ext_resource type="Texture2D" uid="uid://bmupscydhw1d3" path="res://img/Dice/diceMagenta5.png" id="5_bjlv2"]
+[ext_resource type="Texture2D" uid="uid://ba6u0op64id05" path="res://img/Dice/diceMagenta6.png" id="6_5qcd1"]
+[ext_resource type="Texture2D" uid="uid://cqmjkurn6ai4u" path="res://img/Dice/diceRed1.png" id="7_foc7y"]
+[ext_resource type="Texture2D" uid="uid://cceighklifgcv" path="res://img/Dice/diceRed2.png" id="8_r656j"]
+[ext_resource type="Texture2D" uid="uid://cr2hxcplq5bf5" path="res://img/Dice/diceRed3.png" id="9_qolul"]
+[ext_resource type="Texture2D" uid="uid://deky4188i2akq" path="res://img/Dice/diceRed4.png" id="10_s7edt"]
+[ext_resource type="Texture2D" uid="uid://dkknxibbascsk" path="res://img/Dice/diceRed5.png" id="11_k2upg"]
+[ext_resource type="Texture2D" uid="uid://cofo3ydsqk1tv" path="res://img/Dice/diceRed6.png" id="12_g486p"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ovlim"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_qiprr")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_7kbeg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_hmj1a")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_seml7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_bjlv2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_5qcd1")
+}],
+"loop": true,
+"name": &"purple",
+"speed": 20.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_foc7y")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_r656j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_qolul")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_s7edt")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_k2upg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_g486p")
+}],
+"loop": true,
+"name": &"red",
+"speed": 20.0
+}]
+
+[node name="Die" type="AnimatedSprite2D"]
+sprite_frames = SubResource("SpriteFrames_ovlim")
+animation = &"purple"
+frame_progress = 0.309459

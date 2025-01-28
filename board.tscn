@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3 uid="uid://h0cm7y6ly6bh"]
+
+[ext_resource type="Script" path="res://board.gd" id="1_nkxmn"]
+[ext_resource type="Texture2D" uid="uid://dt0hgq3nwyjaa" path="res://img/board.png" id="2_iq1d5"]
+
+[node name="Board" type="Node2D"]
+script = ExtResource("1_nkxmn")
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+modulate = Color(1, 1, 1, 0.603922)
+position = Vector2(770, 537)
+scale = Vector2(1.28, 1.28)
+texture = ExtResource("2_iq1d5")
+flip_h = true
