@@ -79,6 +79,5 @@ func _on_board_used_dice(used_dice: Array) -> void:
 
 func _on_undo_pressed() -> void:
 	roll_values = original_roll_values.duplicate()
-	print(roll_values)
 	for die in dice:
 		die.modulate = unused_color

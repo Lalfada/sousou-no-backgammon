@@ -210,7 +210,7 @@ func recursive_move_search(origin: int, current: int, possible_moves: Dictionary
 	rolls: Array, remaining_rolls: Array, used_rolls: Array) -> void:
 	if rolls.is_empty():
 		if not used_rolls.is_empty():
-			add_move(possible_moves, board_state, origin, 
+			add_move_sequence(possible_moves, board_state, origin, 
 			used_rolls.duplicate(), remaining_rolls.duplicate())
 		return
 		
@@ -264,27 +264,48 @@ func _on_dice_set_dice_result(rolls: Array) -> void:
 	undo_board_state = board_state.duplicate()
 	roll_values = rolls.duplicate()
 	original_roll_values = roll_values.duplicate()
-
-
-func add_move(possible_moves: Dictionary, board: Array, from: int, 
+	
+func add_move_sequence(possible_moves: Dictionary, board: Array, from: int, 
 	steps: Array, remaining_rolls: Array) -> void:
 	var step: int = steps.reduce(func(accum, number): return accum + number, 0)
 	var checker_count = board_state[from]
 	var move_direction = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
 	var target_tile = from + step * move_direction
-	var new_board: Array = compute_move(board, from, target_tile) 
+	var new_board: Array = compute_move_sequence(board, from, steps) 
 	possible_moves[target_tile] = [new_board, steps, remaining_rolls]
+
+# also note that it assumes valid moves
+func compute_move_sequence(board: Array, from: int, moves: Array) -> Array:
+	var debug_worthy: bool = moves.size() >= 2
+	var current_board: Array = board.duplicate()
+	if debug_worthy:
+		print("debugging stuff, from %d" % from)
+		print(moves)
+		print(current_board)
+	for move in moves:
+		var checker_count: int = current_board[from]
+		var move_direction: int = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
+		var target_tile: int = from + move * move_direction
+		current_board = compute_move(current_board, from, target_tile) 
+		if debug_worthy:
+			print("in move: %d, from: %d; target tile: %d" % [move, from, target_tile])
+			print(current_board)
+			print(moves)
+		from = target_tile
+		
+	return current_board
+	
 
 # this functions assumes the move is valid
 func compute_move(board: Array, from: int, to: int) -> Array:
-	var checker_count = board_state[from]
+	var checker_count: int = board[from]
 	var new_board: Array = board.duplicate()
-	var color_direction = 1 if checker_count > 0 else -1
+	var color_direction: int = 1 if checker_count > 0 else -1
 	
 	# leave square
 	new_board[from] -= color_direction
 	# if there is an enemy checker, eat it
-	if sign(checker_count) == -sign(board_state[to]):
+	if sign(checker_count) == -sign(board[to]):
 		new_board[to] = color_direction
 	else:
 		new_board[to] += color_direction
