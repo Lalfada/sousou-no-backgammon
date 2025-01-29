@@ -22,16 +22,20 @@ const default_board: Array = [
 
 @onready var checker_scene := preload("res://Checker.tscn")
 @onready var light_scene := preload("res://light.tscn")
-var board_state : Array = []
-var checkers : Array = []
-var selected_checkers : Array = []
+var board_state: Array = []
+var undo_board_state: Array = []
+var checkers: Array = []
+var selected_checkers: Array = []
 var light_effects: Array = []
 var roll_values: Array = [1, 1]
+var original_roll_values: Array
 var moves: Dictionary = {}
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	board_state = default_board
+	board_state = default_board.duplicate()
+	undo_board_state = board_state.duplicate()
+	original_roll_values = roll_values.duplicate()
 	update_graphics()
 
 
@@ -257,7 +261,10 @@ func update_possible_moves(moves: Dictionary) -> void:
 
 func _on_dice_set_dice_result(rolls: Array) -> void:
 	clear_selection()
+	undo_board_state = board_state.duplicate()
 	roll_values = rolls.duplicate()
+	original_roll_values = roll_values.duplicate()
+
 
 func add_move(possible_moves: Dictionary, board: Array, from: int, 
 	steps: Array, remaining_rolls: Array) -> void:
@@ -283,3 +290,10 @@ func compute_move(board: Array, from: int, to: int) -> Array:
 		new_board[to] += color_direction
 		
 	return new_board
+
+
+func _on_undo_pressed() -> void:
+	clear_selection()
+	board_state = undo_board_state.duplicate()
+	roll_values = original_roll_values.duplicate()
+	update_graphics()

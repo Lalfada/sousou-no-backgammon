@@ -11,17 +11,18 @@ four_dice_offset = Vector2(0, 145)
 metadata/_edit_group_ = true
 
 [node name="Die1" parent="." instance=ExtResource("1_4xf72")]
+position = Vector2(-149.5, 0)
 
 [node name="Die2" parent="." instance=ExtResource("1_4xf72")]
-position = Vector2(308, 0)
+position = Vector2(158.5, 0)
 
 [node name="Die3" parent="." instance=ExtResource("1_4xf72")]
 visible = false
-position = Vector2(1, -292)
+position = Vector2(-148.5, -292)
 
 [node name="Die4" parent="." instance=ExtResource("1_4xf72")]
 visible = false
-position = Vector2(302, -297)
+position = Vector2(152.5, -297)
 
 [node name="Timer" type="Timer" parent="."]
 wait_time = 0.6

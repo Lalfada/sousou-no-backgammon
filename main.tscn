@@ -1,9 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://yi2ir1iefj7v"]
+[gd_scene load_steps=7 format=3 uid="uid://yi2ir1iefj7v"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_46kha"]
 [ext_resource type="PackedScene" uid="uid://h0cm7y6ly6bh" path="res://board.tscn" id="1_m6jjh"]
 [ext_resource type="Texture2D" uid="uid://cr58w4j6k0m4n" path="res://img/background2.jpg" id="3_wufsu"]
 [ext_resource type="PackedScene" uid="uid://chlm3x8aew8b6" path="res://dice_set.tscn" id="4_2qb2t"]
+[ext_resource type="PackedScene" uid="uid://dytk8f6csll3w" path="res://undo.tscn" id="6_jkblc"]
 [ext_resource type="PackedScene" uid="uid://cblvobknfqofx" path="res://roll.tscn" id="6_oreuy"]
 
 [node name="Main" type="Node"]
@@ -27,28 +28,52 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = -377.0
+offset_right = 3.0
+offset_bottom = -9.0
 grow_horizontal = 0
 grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
-
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 420)
-layout_mode = 2
+theme_override_constants/separation = 30
 
 [node name="DiceSpace" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 400)
 layout_mode = 2
 
-[node name="DiceSet" parent="MarginContainer/VBoxContainer/DiceSpace" instance=ExtResource("4_2qb2t")]
-position = Vector2(97, 125)
+[node name="DiceRoot" type="Control" parent="MarginContainer/VBoxContainer/DiceSpace"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="DiceSet" parent="MarginContainer/VBoxContainer/DiceSpace/DiceRoot" instance=ExtResource("4_2qb2t")]
 scale = Vector2(0.598, 0.6)
 
 [node name="Roll" parent="MarginContainer/VBoxContainer" instance=ExtResource("6_oreuy")]
 layout_mode = 2
 size_flags_horizontal = 4
 
-[connection signal="used_dice" from="Board" to="MarginContainer/VBoxContainer/DiceSpace/DiceSet" method="_on_board_used_dice"]
-[connection signal="dice_result" from="MarginContainer/VBoxContainer/DiceSpace/DiceSet" to="Board" method="_on_dice_set_dice_result"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/Roll" to="MarginContainer/VBoxContainer/DiceSpace/DiceSet" method="_on_roll_pressed"]
+[node name="Undo" parent="MarginContainer/VBoxContainer" instance=ExtResource("6_jkblc")]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[connection signal="used_dice" from="Board" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_board_used_dice"]
+[connection signal="dice_result" from="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" to="Board" method="_on_dice_set_dice_result"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Roll" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_roll_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Undo" to="Board" method="_on_undo_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Undo" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_undo_pressed"]
