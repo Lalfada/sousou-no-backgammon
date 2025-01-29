@@ -3,13 +3,18 @@ class_name Board
 
 signal used_dice(dice: Array)
 
-const SQUARE_NUMBER: int = 24
-const COLUMN_WIDTH: int = 125
-const LEFT_START: int = 70
-const RIGHT_START: int = 850
-const CHECKER_SIZE: int = 90
-const VERTICAL_START: int = 60
-const COLUMN_HEIGHT: int = 400
+# The values here are only educated guesses
+# They're remplaced by distance defined by markers in
+# the _ready() function
+var SQUARE_NUMBER: int = 24
+var COLUMN_WIDTH: int = 125
+var LEFT_START: int = 70
+var RIGHT_START: int = 850
+var CHECKER_SIZE: int = 90
+var VERTICAL_START: int = 60
+var BOTTOM_START: int = 1020
+var TOP_START: int = 60
+var COLUMN_HEIGHT: int = 400
 
 # negative values are black checkers, and zero means no checkers.
 const default_board: Array = [
@@ -36,6 +41,15 @@ func _ready() -> void:
 	board_state = default_board.duplicate()
 	undo_board_state = board_state.duplicate()
 	original_roll_values = roll_values.duplicate()
+	
+	VERTICAL_START = $TopMarker.position.y
+	COLUMN_WIDTH = ($Column6Marker.position.x - $BotLeftMarker.position.x) / 5
+	RIGHT_START = $Column7Marker.position.x
+	LEFT_START = $BotLeftMarker.position.x
+	BOTTOM_START = $BotLeftMarker.position.y
+	TOP_START = $TopMarker.position.y
+	COLUMN_HEIGHT = $BotLeftMarker.position.y - $HeightMarker.position.y
+	
 	update_graphics()
 
 
@@ -90,13 +104,13 @@ func get_tile_positions() -> Array:
 	# This is an example, customize it based on your board's layout
 	var positions = []
 	for x in range(6):  # Bottom right
-		positions.append(Vector2(RIGHT_START + COLUMN_WIDTH * (5 - x), screen_size.y - VERTICAL_START))
+		positions.append(Vector2(RIGHT_START + COLUMN_WIDTH * (5 - x), BOTTOM_START))
 	for x in range(6):  # Bottom left
-		positions.append(Vector2(LEFT_START + COLUMN_WIDTH * (5 - x), screen_size.y - VERTICAL_START))
+		positions.append(Vector2(LEFT_START + COLUMN_WIDTH * (5 - x), BOTTOM_START))
 	for x in range(6):  # Top left
-		positions.append(Vector2(LEFT_START + COLUMN_WIDTH * x, VERTICAL_START))
+		positions.append(Vector2(LEFT_START + COLUMN_WIDTH * x, TOP_START))
 	for x in range(6):  # Top right
-		positions.append(Vector2(RIGHT_START + COLUMN_WIDTH * x, VERTICAL_START))
+		positions.append(Vector2(RIGHT_START + COLUMN_WIDTH * x, TOP_START))
 
 	return positions
 	
@@ -276,21 +290,12 @@ func add_move_sequence(possible_moves: Dictionary, board: Array, from: int,
 
 # also note that it assumes valid moves
 func compute_move_sequence(board: Array, from: int, moves: Array) -> Array:
-	var debug_worthy: bool = moves.size() >= 2
 	var current_board: Array = board.duplicate()
-	if debug_worthy:
-		print("debugging stuff, from %d" % from)
-		print(moves)
-		print(current_board)
 	for move in moves:
 		var checker_count: int = current_board[from]
 		var move_direction: int = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
 		var target_tile: int = from + move * move_direction
 		current_board = compute_move(current_board, from, target_tile) 
-		if debug_worthy:
-			print("in move: %d, from: %d; target tile: %d" % [move, from, target_tile])
-			print(current_board)
-			print(moves)
 		from = target_tile
 		
 	return current_board

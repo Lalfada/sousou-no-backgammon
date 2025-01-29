@@ -13,3 +13,18 @@ position = Vector2(770, 537)
 scale = Vector2(1.28, 1.28)
 texture = ExtResource("2_iq1d5")
 flip_h = true
+
+[node name="BotLeftMarker" type="Marker2D" parent="."]
+position = Vector2(67, 1012)
+
+[node name="Column6Marker" type="Marker2D" parent="."]
+position = Vector2(686, 1019)
+
+[node name="Column7Marker" type="Marker2D" parent="."]
+position = Vector2(846, 1011)
+
+[node name="TopMarker" type="Marker2D" parent="."]
+position = Vector2(71, 62)
+
+[node name="HeightMarker" type="Marker2D" parent="."]
+position = Vector2(66, 605)
