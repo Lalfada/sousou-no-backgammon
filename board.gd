@@ -11,17 +11,23 @@ var COLUMN_WIDTH: int = 125
 var LEFT_START: int = 70
 var RIGHT_START: int = 850
 var CHECKER_SIZE: int = 90
+var COMPACT_CHECKER_SIZE: int = 30
 var VERTICAL_START: int = 60
 var BOTTOM_START: int = 1020
 var TOP_START: int = 60
 var COLUMN_HEIGHT: int = 400
+var BAR_HEIGHT: int = 200
 
-# negative values are black checkers, and zero means no checkers.
+# positive values are white checkers
+# negative values are black checkers
+# and zero means no checkers.
+# index 24 is white's eaten pieces and 25 is black's
 const default_board: Array = [
 	2, 0, 0, 0, 0, -5,
 	0, -3, 0, 0, 0, 5,
 	-5, 0, 0, 0, 3, 0,
-	5, 0, 0, 0, 0, -2
+	5, 0, 0, 0, 0, -2,
+	0, 0
 	]
 
 
@@ -49,6 +55,7 @@ func _ready() -> void:
 	BOTTOM_START = $BotLeftMarker.position.y
 	TOP_START = $TopMarker.position.y
 	COLUMN_HEIGHT = $BotLeftMarker.position.y - $HeightMarker.position.y
+	BAR_HEIGHT = ($WhiteCaptured.position.y - $BlackCaptured.position.y) / 2
 	
 	update_graphics()
 
@@ -83,10 +90,10 @@ func update_graphics() -> void:
 			
 			# set checker id
 			checker_instance.set_id(i)
-			
 			# Set the position of the checker
-			var stack_direction = -1 if i < 12 else 1
-			checker_instance.position = tile_positions[i] + Vector2(0, j * CHECKER_SIZE * stack_direction)  # Stack vertically
+			var stack_direction: int = get_stack_direction(i)
+			var stack_distance: int = CHECKER_SIZE if i < 24 else COMPACT_CHECKER_SIZE
+			checker_instance.position = tile_positions[i] + Vector2(0, j * stack_distance * stack_direction)  # Stack vertically
 
 			# Set the color or property of the checker (white/black)
 			if is_white:
@@ -104,13 +111,16 @@ func get_tile_positions() -> Array:
 	# This is an example, customize it based on your board's layout
 	var positions = []
 	for x in range(6):  # Bottom right
-		positions.append(Vector2(RIGHT_START + COLUMN_WIDTH * (5 - x), BOTTOM_START))
+		positions.push_back(Vector2(RIGHT_START + COLUMN_WIDTH * (5 - x), BOTTOM_START))
 	for x in range(6):  # Bottom left
-		positions.append(Vector2(LEFT_START + COLUMN_WIDTH * (5 - x), BOTTOM_START))
+		positions.push_back(Vector2(LEFT_START + COLUMN_WIDTH * (5 - x), BOTTOM_START))
 	for x in range(6):  # Top left
-		positions.append(Vector2(LEFT_START + COLUMN_WIDTH * x, TOP_START))
+		positions.push_back(Vector2(LEFT_START + COLUMN_WIDTH * x, TOP_START))
 	for x in range(6):  # Top right
-		positions.append(Vector2(RIGHT_START + COLUMN_WIDTH * x, TOP_START))
+		positions.push_back(Vector2(RIGHT_START + COLUMN_WIDTH * x, TOP_START))
+		
+	positions.push_back($WhiteCaptured.position)
+	positions.push_back($BlackCaptured.position)
 
 	return positions
 	
@@ -121,11 +131,12 @@ func get_tile_id_from_mouse(mouse_pos: Vector2) -> int:
 	var tile_height: int = COLUMN_HEIGHT
 
 	for i in range(tile_positions.size()):
-		var stack_direction = -1 if i < 12 else 1
-		var tile_pos = tile_positions[i]
+		var actual_height: int = tile_height if i < 24 else BAR_HEIGHT
+		var stack_direction: int = get_stack_direction(i)
+		var tile_pos: Vector2 = tile_positions[i]
 		# Check if the mouse is within the tile's radius
 		var x_cond: bool = abs(tile_pos.x - mouse_pos.x) <= tile_width / 2
-		var y_cond: bool = abs(tile_pos.y + tile_height / 2 * stack_direction - mouse_pos.y) <= tile_height / 2
+		var y_cond: bool = abs(tile_pos.y + actual_height / 2 * stack_direction - mouse_pos.y) <= actual_height / 2
 		if  x_cond and y_cond :
 			return i  # Return the ID of the tile (index in the array)
 
@@ -145,7 +156,7 @@ func _input(event):
 func update_selection(tile_id: int) -> void:
 	clear_selection()
 	select_checkers(tile_id)
-	moves = find_possible_moves_v2(tile_id, roll_values)
+	moves = find_possible_moves(tile_id, roll_values)
 	update_possible_moves(moves)
 
 	
@@ -174,49 +185,12 @@ func select_checkers(tile_id: int) -> void:
 			selected_checkers.push_back(checker)
 			
 
-# Function to find possible moves from a given tile_id based on two dice rolls
-#func find_possible_moves(tile_id: int, die1: int, die2: int) -> Dictionary:
-	#var possible_moves: Dictionary = {}
-#
-	## Get the color of the checker on the current tile
-	#var checker_count: int = board_state[tile_id]
-#
-	#if checker_count == 0:
-		## No checker on the tile, so no moves possible.
-		#return possible_moves
-#
-	#var dice_sum = die1 + die2
-	## If doubles, repeat the roll 4 times
-	#var is_double: bool = die1 == die2
-#
-	#if not is_double:
-		#var d1_valid: bool = is_move_valid(tile_id, die1)
-		#var d2_valid: bool = is_move_valid(tile_id, die2)
-		#if d1_valid:
-			#add_move(possible_moves,board_state, tile_id, [die1])
-		#if d2_valid:
-			#add_move(possible_moves,board_state, tile_id, [die2])
-		### we need to check for the existence of a path
-		#if (d1_valid or d2_valid) and is_move_valid(tile_id, dice_sum):
-			#add_move(possible_moves,board_state, tile_id, [die1, die2])
-	#
-	## Handle the case where dice are doubles
-	#else:
-		#var dice_used: Array = []
-		#for i in range(1, 5):
-			## if any move is not valid, then the next one
-			## wont be since the previous is required
-			#if not is_move_valid(tile_id, die1 * i):
-				#break
-			#dice_used.push_back(die1)
-			#add_move(possible_moves, board_state, tile_id, dice_used.duplicate())
-			#
-	#return possible_moves
-
-func find_possible_moves_v2(tile_id: int, rolls: Array) -> Dictionary:
+func find_possible_moves(tile_id: int, rolls: Array) -> Dictionary:
 	assert (not roll_values.has(0))
+	
 	var possible_moves: Dictionary = {}
 	var rolls_copy: Array = rolls.duplicate()
+	
 	recursive_move_search(tile_id, 0, possible_moves, rolls_copy, [], [])
 	return possible_moves
 	
@@ -249,7 +223,7 @@ func recursive_move_search(origin: int, current: int, possible_moves: Dictionary
 func is_move_valid(from: int, step: int) -> bool:
 	var checker_count = board_state[from]
 	var move_direction = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
-	var target_tile = from + step * move_direction
+	var target_tile = get_actual_position(from) + step * move_direction
 	
 	# Ensure the target tile is within the board boundaries (0 to 23)
 	if target_tile < 0 or target_tile > 23:
@@ -284,7 +258,7 @@ func add_move_sequence(possible_moves: Dictionary, board: Array, from: int,
 	var step: int = steps.reduce(func(accum, number): return accum + number, 0)
 	var checker_count = board_state[from]
 	var move_direction = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
-	var target_tile = from + step * move_direction
+	var target_tile = get_actual_position(from) + step * move_direction
 	var new_board: Array = compute_move_sequence(board, from, steps) 
 	possible_moves[target_tile] = [new_board, steps, remaining_rolls]
 
@@ -294,7 +268,7 @@ func compute_move_sequence(board: Array, from: int, moves: Array) -> Array:
 	for move in moves:
 		var checker_count: int = current_board[from]
 		var move_direction: int = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
-		var target_tile: int = from + move * move_direction
+		var target_tile: int = get_actual_position(from) + move * move_direction
 		current_board = compute_move(current_board, from, target_tile) 
 		from = target_tile
 		
@@ -309,9 +283,12 @@ func compute_move(board: Array, from: int, to: int) -> Array:
 	
 	# leave square
 	new_board[from] -= color_direction
-	# if there is an enemy checker, eat it
+	# if there is an enemy checker, hit it
+	# and send it to the bar
 	if sign(checker_count) == -sign(board[to]):
 		new_board[to] = color_direction
+		var bar_id = 24 if board[to] == 1 else 25
+		new_board[bar_id] += board[to]
 	else:
 		new_board[to] += color_direction
 		
@@ -323,3 +300,11 @@ func _on_undo_pressed() -> void:
 	board_state = undo_board_state.duplicate()
 	roll_values = original_roll_values.duplicate()
 	update_graphics()
+
+func get_stack_direction(tile_id: int) -> int:
+	return -1 if tile_id < 12 or tile_id == 24 else 1
+	
+func get_actual_position(tile_id: int) -> int:
+	if tile_id < 24:
+		return tile_id
+	return -1 if tile_id == 24 else 24

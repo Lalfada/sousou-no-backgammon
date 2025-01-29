@@ -28,3 +28,9 @@ position = Vector2(71, 62)
 
 [node name="HeightMarker" type="Marker2D" parent="."]
 position = Vector2(66, 605)
+
+[node name="WhiteCaptured" type="Marker2D" parent="."]
+position = Vector2(766, 626)
+
+[node name="BlackCaptured" type="Marker2D" parent="."]
+position = Vector2(770, 473)
