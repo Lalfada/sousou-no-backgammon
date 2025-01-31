@@ -2,6 +2,8 @@ extends Node2D
 class_name Board
 
 signal used_dice(dice: Array)
+signal white_checker_left()
+signal black_checker_left()
 
 # The values here are only educated guesses
 # They're remplaced by distance defined by markers in
@@ -22,7 +24,8 @@ var BAR_HEIGHT: int = 200
 # negative values are black checkers
 # and zero means no checkers.
 # index 24 is white's eaten pieces and 25 is black's
-const default_board: Array = [
+# 26 is white's bear off, 27 is black's
+const default_board: Array[int] = [
 	2, 0, 0, 0, 0, -5,
 	0, -3, 0, 0, 0, 5,
 	-5, 0, 0, 0, 3, 0,
@@ -33,13 +36,13 @@ const default_board: Array = [
 
 @onready var checker_scene := preload("res://Checker.tscn")
 @onready var light_scene := preload("res://light.tscn")
-var board_state: Array = []
-var undo_board_state: Array = []
-var checkers: Array = []
-var selected_checkers: Array = []
-var light_effects: Array = []
-var roll_values: Array = [1, 1]
-var original_roll_values: Array
+var board_state: Array[int] = []
+var undo_board_state: Array[int] = []
+var checkers: Array[Checker] = []
+var selected_checkers: Array[Checker] = []
+var light_effects: Array[Sprite2D] = []
+var roll_values: Array[int] = [1, 1]
+var original_roll_values: Array[int]
 var moves: Dictionary = {}
 
 # Called when the node enters the scene tree for the first time.
@@ -195,7 +198,7 @@ func find_possible_moves(tile_id: int, rolls: Array) -> Dictionary:
 	return possible_moves
 	
 func recursive_move_search(origin: int, current: int, possible_moves: Dictionary, 
-	rolls: Array, remaining_rolls: Array, used_rolls: Array) -> void:
+	rolls: Array[int], remaining_rolls: Array[int], used_rolls: Array[int]) -> void:
 	if rolls.is_empty():
 		if not used_rolls.is_empty():
 			add_move_sequence(possible_moves, board_state, origin, 
@@ -225,16 +228,44 @@ func is_move_valid(from: int, step: int) -> bool:
 	var move_direction = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
 	var target_tile = get_actual_position(from) + step * move_direction
 	
-	# Ensure the target tile is within the board boundaries (0 to 23)
+	# If the the checker is trying to reach the bear off
+	# the check its allowed to do so 
 	if target_tile < 0 or target_tile > 23:
-		return false
-		
+		if target_tile > 23 and checker_count > 0 and white_can_leave():
+			return true
+		elif target_tile < 0 and checker_count < 0 and black_can_leave():
+			return true
+		else:
+			return false
 	var target_checker_count = board_state[target_tile]
 	
 	# Check if the target tile is a valid move
 	# White can move to empty spaces or to a single black checker, 
 	# Black can move to empty spaces or to a single white checker
 	return (checker_count > 0 and target_checker_count >= -1) or (checker_count < 0 and target_checker_count <= 1)
+	
+	
+func white_can_leave() -> bool:
+	# check tiles before leaving area
+	for i in range(0, 18):
+		if board_state[i] > 0:
+			return false
+	
+	# check the bar
+	if board_state[24] > 0:
+		return false
+	return true
+	
+func black_can_leave() -> bool:
+	# check tiles before leaving area
+	for i in range(6, 24):
+		if board_state[i] < 0:
+			return false
+	
+	# check the bar
+	if board_state[25] < 0:
+		return false
+	return true
 	
 func update_possible_moves(moves: Dictionary) -> void:
 	var tile_positions: Array = get_tile_positions()
@@ -253,8 +284,8 @@ func _on_dice_set_dice_result(rolls: Array) -> void:
 	roll_values = rolls.duplicate()
 	original_roll_values = roll_values.duplicate()
 	
-func add_move_sequence(possible_moves: Dictionary, board: Array, from: int, 
-	steps: Array, remaining_rolls: Array) -> void:
+func add_move_sequence(possible_moves: Dictionary, board: Array[int], from: int, 
+	steps: Array[int], remaining_rolls: Array[int]) -> void:
 	var step: int = steps.reduce(func(accum, number): return accum + number, 0)
 	var checker_count = board_state[from]
 	var move_direction = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)

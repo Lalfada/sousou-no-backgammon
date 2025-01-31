@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3 uid="uid://bmpycw3mtw04g"]
+
+[ext_resource type="PackedScene" uid="uid://c883tss2a2vr7" path="res://checker.tscn" id="1_rofbb"]
+[ext_resource type="Script" path="res://contained_checker.gd" id="1_udfry"]
+
+[node name="ContainedChecker" type="CenterContainer"]
+custom_minimum_size = Vector2(100, 100)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -50.0
+offset_top = -50.0
+offset_right = 50.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+script = ExtResource("1_udfry")
+
+[node name="Checker" parent="." instance=ExtResource("1_rofbb")]
+position = Vector2(0, 50)

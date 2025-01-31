@@ -1,0 +1,26 @@
+[gd_scene load_steps=4 format=3 uid="uid://cldnjvqh0rvcb"]
+
+[ext_resource type="Script" path="res://bear_off.gd" id="1_lin7r"]
+[ext_resource type="FontFile" uid="uid://d32oisd1qeqpr" path="res://fonts/Bodoni_Moda/BodoniModa-Italic-VariableFont_opsz,wght.ttf" id="2_vs7ck"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_au0ch"]
+font = ExtResource("2_vs7ck")
+font_size = 60
+
+[node name="BearOff" type="HBoxContainer"]
+offset_right = 839.0
+offset_bottom = 426.0
+theme_override_constants/separation = 20
+script = ExtResource("1_lin7r")
+
+[node name="Label" type="Label" parent="."]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+text = "0"
+label_settings = SubResource("LabelSettings_au0ch")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = -90

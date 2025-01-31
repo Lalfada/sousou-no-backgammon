@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://yi2ir1iefj7v"]
+[gd_scene load_steps=10 format=3 uid="uid://yi2ir1iefj7v"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_46kha"]
 [ext_resource type="PackedScene" uid="uid://h0cm7y6ly6bh" path="res://board.tscn" id="1_m6jjh"]
@@ -6,6 +6,13 @@
 [ext_resource type="PackedScene" uid="uid://chlm3x8aew8b6" path="res://dice_set.tscn" id="4_2qb2t"]
 [ext_resource type="PackedScene" uid="uid://dytk8f6csll3w" path="res://undo.tscn" id="6_jkblc"]
 [ext_resource type="PackedScene" uid="uid://cblvobknfqofx" path="res://roll.tscn" id="6_oreuy"]
+[ext_resource type="PackedScene" uid="uid://cldnjvqh0rvcb" path="res://bear_off.tscn" id="7_od7n0"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5famj"]
+bg_color = Color(0.556863, 0, 0.0941176, 0.6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gcqw2"]
+bg_color = Color(0.25098, 0, 0.364706, 0.643137)
 
 [node name="Main" type="Node"]
 script = ExtResource("1_46kha")
@@ -29,8 +36,9 @@ anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -377.0
+offset_top = 7.0
 offset_right = 3.0
-offset_bottom = -9.0
+offset_bottom = -5.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_constants/margin_left = 20
@@ -42,8 +50,19 @@ theme_override_constants/margin_bottom = 20
 layout_mode = 2
 theme_override_constants/separation = 30
 
+[node name="BlackBearOff" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_5famj")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/BlackBearOff"]
+layout_mode = 2
+
+[node name="BearOff" parent="MarginContainer/VBoxContainer/BlackBearOff/MarginContainer" instance=ExtResource("7_od7n0")]
+layout_mode = 2
+is_black = true
+
 [node name="DiceSpace" type="HSeparator" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 400)
+custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
 
 [node name="DiceRoot" type="Control" parent="MarginContainer/VBoxContainer/DiceSpace"]
@@ -61,19 +80,45 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="DiceSet" parent="MarginContainer/VBoxContainer/DiceSpace/DiceRoot" instance=ExtResource("4_2qb2t")]
+position = Vector2(20, 24)
 scale = Vector2(0.598, 0.6)
 
-[node name="Roll" parent="MarginContainer/VBoxContainer" instance=ExtResource("6_oreuy")]
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 4
+size_flags_vertical = 3
 
-[node name="Undo" parent="MarginContainer/VBoxContainer" instance=ExtResource("6_jkblc")]
-custom_minimum_size = Vector2(0, 200)
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-size_flags_horizontal = 4
+theme_override_constants/separation = 10
 
+[node name="Roll" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("6_oreuy")]
+custom_minimum_size = Vector2(170, 100)
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Undo" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("6_jkblc")]
+custom_minimum_size = Vector2(170, 100)
+layout_mode = 2
+size_flags_horizontal = 8
+ignore_texture_size = true
+
+[node name="WhiteBearOff" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gcqw2")
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/WhiteBearOff"]
+layout_mode = 2
+
+[node name="BearOff" parent="MarginContainer/VBoxContainer/WhiteBearOff/MarginContainer" instance=ExtResource("7_od7n0")]
+layout_mode = 2
+
+[connection signal="black_checker_left" from="Board" to="MarginContainer/VBoxContainer/BlackBearOff/MarginContainer/BearOff" method="_on_board_black_checker_left"]
 [connection signal="used_dice" from="Board" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_board_used_dice"]
+[connection signal="white_checker_left" from="Board" to="MarginContainer/VBoxContainer/WhiteBearOff/MarginContainer/BearOff" method="_on_board_white_checker_left"]
 [connection signal="dice_result" from="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" to="Board" method="_on_dice_set_dice_result"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/Roll" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_roll_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/Undo" to="Board" method="_on_undo_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/Undo" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_undo_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Roll" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_roll_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Undo" to="Board" method="_on_undo_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Undo" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_undo_pressed"]

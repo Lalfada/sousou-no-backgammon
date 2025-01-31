@@ -6,21 +6,29 @@
 
 [sub_resource type="LabelSettings" id="LabelSettings_fcm2y"]
 font = ExtResource("3_xfyx4")
-font_size = 60
+font_size = 40
 font_color = Color(0, 0, 0, 1)
 
 [node name="Roll" type="TextureButton"]
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 301.0
+offset_bottom = 204.0
 texture_normal = ExtResource("1_is2s4")
 texture_hover = ExtResource("2_ab3mw")
+stretch_mode = 4
 
 [node name="Label" type="Label" parent="."]
-layout_mode = 0
-offset_left = 51.0
-offset_top = 45.0
-offset_right = 261.0
-offset_bottom = 153.0
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -105.0
+offset_top = -54.0
+offset_right = 105.0
+offset_bottom = 54.0
+grow_horizontal = 2
+grow_vertical = 2
 text = "ROLL"
 label_settings = SubResource("LabelSettings_fcm2y")
 horizontal_alignment = 1
