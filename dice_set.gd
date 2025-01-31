@@ -8,10 +8,10 @@ signal dice_result(Array)
 @export var unused_color: Color
 @export var four_dice_offset: Vector2
 var default_postion: Vector2
-var roll_values: Array = [1, 1, 1, 1]
-var original_roll_values: Array
+var roll_values: Array[int] = [1, 1, 1, 1]
+var original_roll_values: Array[int]
 var is_rolling: bool = false
-var dice: Array
+var dice: Array[AnimatedSprite2D]
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:

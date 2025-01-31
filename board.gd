@@ -188,7 +188,7 @@ func select_checkers(tile_id: int) -> void:
 			selected_checkers.push_back(checker)
 			
 
-func find_possible_moves(tile_id: int, rolls: Array) -> Dictionary:
+func find_possible_moves(tile_id: int, rolls: Array[int]) -> Dictionary:
 	assert (not roll_values.has(0))
 	
 	var possible_moves: Dictionary = {}
@@ -199,6 +199,12 @@ func find_possible_moves(tile_id: int, rolls: Array) -> Dictionary:
 	
 func recursive_move_search(origin: int, current: int, possible_moves: Dictionary, 
 	rolls: Array[int], remaining_rolls: Array[int], used_rolls: Array[int]) -> void:
+	#print("--- In recursive_move_search ---")
+	#print("origin: %d; current: %d" % [origin, current])
+	#print(rolls)
+	#print(remaining_rolls)
+	#print(used_rolls)
+		
 	if rolls.is_empty():
 		if not used_rolls.is_empty():
 			add_move_sequence(possible_moves, board_state, origin, 
@@ -278,7 +284,7 @@ func update_possible_moves(moves: Dictionary) -> void:
 		light_effects.push_back(light)
 
 
-func _on_dice_set_dice_result(rolls: Array) -> void:
+func _on_dice_set_dice_result(rolls: Array[int]) -> void:
 	clear_selection()
 	undo_board_state = board_state.duplicate()
 	roll_values = rolls.duplicate()
