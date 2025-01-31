@@ -4,6 +4,14 @@ class_name Board
 signal used_dice(dice: Array)
 signal white_checker_left()
 signal black_checker_left()
+signal can_checker_leave(is_black: bool, can_leave: bool)
+
+const WHITE_BAR: int = 24
+const BLACK_BAR: int = 25
+const WHITE_BEAR_OFF: int = 26
+const BLACK_BEAR_OFF: int = 27
+# these are all the indexes handles by the board
+const BOARD_MANAGED_TILES = 25
 
 # The values here are only educated guesses
 # They're remplaced by distance defined by markers in
@@ -24,14 +32,26 @@ var BAR_HEIGHT: int = 200
 # negative values are black checkers
 # and zero means no checkers.
 # index 24 is white's eaten pieces and 25 is black's
-# 26 is white's bear off, 27 is black's
+# index 26 is white's bear off and 27 is black's
 const default_board: Array[int] = [
 	2, 0, 0, 0, 0, -5,
 	0, -3, 0, 0, 0, 5,
 	-5, 0, 0, 0, 3, 0,
 	5, 0, 0, 0, 0, -2,
+	0, 0,
 	0, 0
 	]
+
+# for debugging purposes
+const endgame_board: Array[int] = [
+	-2, -2, -1, -2, -3, -5,
+	0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0,
+	1, 4, 2, 1, 1, 2,
+	0, 0,
+	0, 0
+	]
+
 
 
 @onready var checker_scene := preload("res://Checker.tscn")
@@ -45,15 +65,31 @@ var roll_values: Array[int] = [1, 1]
 var original_roll_values: Array[int]
 var moves: Dictionary = {}
 
+class LeavingCheckers:
+	var whites: int
+	var blacks: int
+	
+	func _init(whites: int, blacks: int):
+		self.whites = whites
+		self.blacks = blacks
+		
+	func add(other: LeavingCheckers):
+		whites += other.whites
+		blacks += other.blacks
+
 class Move:
 	var board: Array[int]
 	var steps: Array[int]
 	var remaining_rolls: Array[int]
+	var leaving_checkers: LeavingCheckers
 	
-	func _init(board: Array[int], steps: Array[int], remaining_rolls: Array[int]):
+	func _init(board: Array[int], steps: Array[int], remaining_rolls: Array[int],
+		leaving_checkers: LeavingCheckers):
 		self.board = board
-		self.steps = board
+		self.steps = steps
 		self.remaining_rolls = remaining_rolls
+		self.leaving_checkers = leaving_checkers
+
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -86,7 +122,7 @@ func update_graphics() -> void:
 	# Define tile positions based on the board array
 	var tile_positions = get_tile_positions()  # A helper function to define tile positions
 	
-	for i in range(board_state.size()):
+	for i in range(BOARD_MANAGED_TILES):
 		var count: int = board_state[i]
 		
 		if count == 0:
@@ -160,11 +196,13 @@ func _input(event):
 		var tile_id: int = get_tile_id_from_mouse(event.position)
 		if tile_id == -1:
 			return
-		if tile_id in moves:
-			play_move(tile_id)
-		else:
-			update_selection(tile_id)
+		clicked_on_tile(tile_id)
 
+func clicked_on_tile(tile_id: int) -> void:
+	if tile_id in moves:
+		play_move(tile_id)
+	else:
+		update_selection(tile_id)
 
 func update_selection(tile_id: int) -> void:
 	clear_selection()
@@ -174,9 +212,21 @@ func update_selection(tile_id: int) -> void:
 
 	
 func play_move(to: int) -> void:
-	used_dice.emit(moves[to].steps)
-	board_state = moves[to].board
-	roll_values = moves[to].remaining_rolls
+	var move: Move = moves[to]
+	used_dice.emit(move.steps)
+	board_state = move.board
+	roll_values = move.remaining_rolls
+	
+	#print("in play_move")
+	#print(move.steps)
+	#print(board_state)
+	#print(roll_values)
+	
+	for i in range(move.leaving_checkers.whites):
+		white_checker_left.emit()
+	for i in range(move.leaving_checkers.blacks):
+		black_checker_left.emit()
+	
 	clear_selection()
 	update_graphics()
 
@@ -188,6 +238,9 @@ func clear_selection() -> void:
 	for light in light_effects:
 		light.queue_free()
 	light_effects.clear()
+	
+	can_checker_leave.emit(false, false)
+	can_checker_leave.emit(true, false)
 	
 	moves.clear()
 	
@@ -209,12 +262,11 @@ func find_possible_moves(tile_id: int, rolls: Array[int]) -> Dictionary:
 	
 func recursive_move_search(origin: int, current: int, possible_moves: Dictionary, 
 	rolls: Array[int], remaining_rolls: Array[int], used_rolls: Array[int]) -> void:
-	#print("--- In recursive_move_search ---")
-	#print("origin: %d; current: %d" % [origin, current])
+	#print("in recursive_move_search; origin: %d; current: %d" % [origin, current])
 	#print(rolls)
 	#print(remaining_rolls)
 	#print(used_rolls)
-		
+	
 	if rolls.is_empty():
 		if not used_rolls.is_empty():
 			add_move_sequence(possible_moves, board_state, origin, 
@@ -238,7 +290,7 @@ func recursive_move_search(origin: int, current: int, possible_moves: Dictionary
 			new_used_rolls.push_back(roll)
 			recursive_move_search(origin, current + roll, possible_moves, 
 			new_rolls, remaining_rolls, new_used_rolls)
-	
+
 func is_move_valid(from: int, step: int) -> bool:
 	var checker_count = board_state[from]
 	var move_direction = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
@@ -286,12 +338,15 @@ func black_can_leave() -> bool:
 func update_possible_moves(moves: Dictionary) -> void:
 	var tile_positions: Array = get_tile_positions()
 	for i: int in moves.keys():
-		var light: Sprite2D = light_scene.instantiate()
-		light.position = tile_positions[i]
-		if i >= 12:
-			light.rotation = PI
-		add_child(light)
-		light_effects.push_back(light)
+		if i < 24:
+			var light: Sprite2D = light_scene.instantiate()
+			light.position = tile_positions[i]
+			if i >= 12:
+				light.rotation = PI
+			add_child(light)
+			light_effects.push_back(light)
+		else:
+			can_checker_leave.emit(i == BLACK_BEAR_OFF, true)
 
 
 func _on_dice_set_dice_result(rolls: Array[int]) -> void:
@@ -306,30 +361,70 @@ func add_move_sequence(possible_moves: Dictionary, board: Array[int], from: int,
 	var checker_count = board_state[from]
 	var move_direction = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
 	var target_tile = get_actual_position(from) + step * move_direction
-	var new_board: Array = compute_move_sequence(board, from, steps) 
-	possible_moves[target_tile] = Move.new(new_board, steps, remaining_rolls)
+	
+	if target_tile > 23:
+		target_tile = WHITE_BEAR_OFF
+	elif target_tile < 0:
+		target_tile = BLACK_BEAR_OFF
+		
+	# we do this check to ensure that when reaching the bear off
+	# we do not use more dice than neccesary
+	# additionnaly, considering such cases means taking into account
+	# case where checkers move in the bear off, which is not valid
+	# and hence lead to bugs
+	if target_tile in possible_moves \
+		and possible_moves[target_tile].steps.size() < steps.size():
+		return
+	
+	var restulting_state: Array = compute_move_sequence(board, from, steps) 
+	var new_board: Array[int] = restulting_state[0]
+	var leaving_checkers: LeavingCheckers = restulting_state[1]
+	
+	#print("adding move")
+	#print(steps)
+	#print(remaining_rolls)
+	
+	
+	possible_moves[target_tile] = Move.new(new_board, steps, remaining_rolls, leaving_checkers)
 
-# also note that it assumes valid moves
-func compute_move_sequence(board: Array, from: int, moves: Array) -> Array:
-	var current_board: Array = board.duplicate()
+# note that it assumes valid moves
+func compute_move_sequence(board: Array[int], from: int, moves: Array[int]) -> Array:
+	var current_board: Array[int] = board.duplicate()
+	var leaving_checkers: LeavingCheckers = LeavingCheckers.new(0, 0)
+	
 	for move in moves:
 		var checker_count: int = current_board[from]
-		var move_direction: int = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
+		var move_direction: int = 1 if checker_count > 0 else -1
 		var target_tile: int = get_actual_position(from) + move * move_direction
-		current_board = compute_move(current_board, from, target_tile) 
+		
+		var result: Array = compute_move(current_board, from, target_tile) 
+		
+		current_board = result[0]
+		leaving_checkers.add(result[1])
 		from = target_tile
 		
-	return current_board
+	return [current_board, leaving_checkers]
 	
 
 # this functions assumes the move is valid
-func compute_move(board: Array, from: int, to: int) -> Array:
+func compute_move(board: Array[int],
+	from: int, to: int) -> Array:
 	var checker_count: int = board[from]
-	var new_board: Array = board.duplicate()
+	var new_board: Array[int] = board.duplicate()
 	var color_direction: int = 1 if checker_count > 0 else -1
 	
 	# leave square
 	new_board[from] -= color_direction
+	
+	# Check if the the checker is trying to reach the bear off
+	# This is done assuming the checker is allowed to do so
+	if to > 23:
+		new_board[WHITE_BEAR_OFF] += 1
+		return [new_board, LeavingCheckers.new(1, 0)]
+	elif to < 0:
+		new_board[BLACK_BEAR_OFF] += 1
+		return [new_board, LeavingCheckers.new(0, 1)]
+	
 	# if there is an enemy checker, hit it
 	# and send it to the bar
 	if sign(checker_count) == -sign(board[to]):
@@ -338,8 +433,8 @@ func compute_move(board: Array, from: int, to: int) -> Array:
 		new_board[bar_id] += board[to]
 	else:
 		new_board[to] += color_direction
-		
-	return new_board
+
+	return [new_board, LeavingCheckers.new(0, 0)]
 
 
 func _on_undo_pressed() -> void:
@@ -355,3 +450,7 @@ func get_actual_position(tile_id: int) -> int:
 	if tile_id < 24:
 		return tile_id
 	return -1 if tile_id == 24 else 24
+
+
+func _clicked_on_bear_off(tile_id: int) -> void:
+	clicked_on_tile(tile_id)

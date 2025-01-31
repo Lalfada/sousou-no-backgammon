@@ -3,7 +3,7 @@
 [ext_resource type="PackedScene" uid="uid://c883tss2a2vr7" path="res://checker.tscn" id="1_rofbb"]
 [ext_resource type="Script" path="res://contained_checker.gd" id="1_udfry"]
 
-[node name="ContainedChecker" type="CenterContainer"]
+[node name="ContainedChecker" type="CenterContainer" groups=["checker"]]
 custom_minimum_size = Vector2(100, 100)
 anchors_preset = 8
 anchor_left = 0.5

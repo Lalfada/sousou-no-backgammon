@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://yi2ir1iefj7v"]
+[gd_scene load_steps=18 format=3 uid="uid://yi2ir1iefj7v"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_46kha"]
 [ext_resource type="PackedScene" uid="uid://h0cm7y6ly6bh" path="res://board.tscn" id="1_m6jjh"]
@@ -8,11 +8,204 @@
 [ext_resource type="PackedScene" uid="uid://cblvobknfqofx" path="res://roll.tscn" id="6_oreuy"]
 [ext_resource type="PackedScene" uid="uid://cldnjvqh0rvcb" path="res://bear_off.tscn" id="7_od7n0"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5famj"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a7x05"]
+bg_color = Color(0.25098, 0, 0.364706, 0.643137)
+border_color = Color(0.761736, 0.7587, 0.831091, 1)
+border_blend = true
+shadow_color = Color(0.858824, 0.705882, 0, 0.717647)
+
+[sub_resource type="Shader" id="Shader_m3enf"]
+code = "shader_type canvas_item;
+
+uniform float glow;
+uniform sampler2D curve;
+uniform sampler2D screen_texture : hint_screen_texture, repeat_disable, filter_nearest;
+
+vec3 rgb2hsb( in vec3 c ){
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(c.bg, K.wz),
+                 vec4(c.gb, K.xy),
+                 step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r),
+                 vec4(c.r, p.yzx),
+                 step(p.x, c.r));
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)),
+                d / (q.x + e),
+                q.x);
+}
+
+//  Function from Iñigo Quiles
+//  https://www.shadertoy.com/view/MsS3Wc
+vec3 hsb2rgb( in vec3 c ){
+    vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),
+                             6.0)-3.0)-1.0,
+                     0.0,
+                     1.0 );
+    rgb = rgb*rgb*(3.0-2.0*rgb);
+    return c.z * mix(vec3(1.0), rgb, c.y);
+}
+
+float doubleCubicSeat (float x, float a, float b){
+
+  float epsilon = 0.00001;
+  float min_param_a = 0.0 + epsilon;
+  float max_param_a = 1.0 - epsilon;
+  float min_param_b = 0.0;
+  float max_param_b = 1.0;
+  a = min(max_param_a, max(min_param_a, a));
+  b = min(max_param_b, max(min_param_b, b));
+
+  float y = 0.0;
+  if (x <= a){
+    y = b - b*pow(1.0-x/a, 3.0);
+  } else {
+    y = b + (1.0-b)*pow((x-a)/(1.0-a), 3.0);
+  }
+  return y;
+}
+
+float mix2(float edge, float mid, float t) {
+	return mix(mix(0.0, mid, t/edge), mix(mid, 1.0, (t-edge)/(1.0-edge)), step(edge, t));
+}
+
+void fragment() {
+	vec4 back = textureLod(screen_texture, SCREEN_UV, 0.0);
+	
+	vec2 st = vec2(0.5f, 0.5f);
+	vec3 col =  back.rgb;
+	float alpha = back.a;
+	col = rgb2hsb(col);
+	 //t is distance to rectangle
+	float t = min(min(UV.x, 1.0-UV.x), min(UV.y, 1.0-UV.y));
+	t = texture(curve, vec2(t, 0.5)).r;
+	col.y = mix(col.y, 0.0, t);
+	col.z = mix(col.z, 1.0, t);
+	col = hsb2rgb(col);
+	COLOR = mix(back, vec4(col, alpha), glow);
+	//COLOR = texture(TEXTURE, UV);
+}
+
+void vertex() {
+	// Called for every vertex the material is visible on.
+}
+
+//void light() {
+	// Called for every pixel for every light affecting the CanvasItem.
+	// Uncomment to replace the default light processing function with this one.
+//}
+"
+
+[sub_resource type="Curve" id="Curve_foah1"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.114583, 0), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_f8l04"]
+curve = SubResource("Curve_foah1")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_iwov3"]
+shader = SubResource("Shader_m3enf")
+shader_parameter/glow = 0.0
+shader_parameter/curve = SubResource("CurveTexture_f8l04")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0iue8"]
 bg_color = Color(0.556863, 0, 0.0941176, 0.6)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gcqw2"]
-bg_color = Color(0.25098, 0, 0.364706, 0.643137)
+[sub_resource type="Shader" id="Shader_q17w3"]
+code = "shader_type canvas_item;
+
+uniform float glow;
+uniform sampler2D curve;
+uniform sampler2D screen_texture : hint_screen_texture, repeat_disable, filter_nearest;
+
+vec3 rgb2hsb( in vec3 c ){
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(c.bg, K.wz),
+                 vec4(c.gb, K.xy),
+                 step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r),
+                 vec4(c.r, p.yzx),
+                 step(p.x, c.r));
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)),
+                d / (q.x + e),
+                q.x);
+}
+
+//  Function from Iñigo Quiles
+//  https://www.shadertoy.com/view/MsS3Wc
+vec3 hsb2rgb( in vec3 c ){
+    vec3 rgb = clamp(abs(mod(c.x*6.0+vec3(0.0,4.0,2.0),
+                             6.0)-3.0)-1.0,
+                     0.0,
+                     1.0 );
+    rgb = rgb*rgb*(3.0-2.0*rgb);
+    return c.z * mix(vec3(1.0), rgb, c.y);
+}
+
+float doubleCubicSeat (float x, float a, float b){
+
+  float epsilon = 0.00001;
+  float min_param_a = 0.0 + epsilon;
+  float max_param_a = 1.0 - epsilon;
+  float min_param_b = 0.0;
+  float max_param_b = 1.0;
+  a = min(max_param_a, max(min_param_a, a));
+  b = min(max_param_b, max(min_param_b, b));
+
+  float y = 0.0;
+  if (x <= a){
+    y = b - b*pow(1.0-x/a, 3.0);
+  } else {
+    y = b + (1.0-b)*pow((x-a)/(1.0-a), 3.0);
+  }
+  return y;
+}
+
+float mix2(float edge, float mid, float t) {
+	return mix(mix(0.0, mid, t/edge), mix(mid, 1.0, (t-edge)/(1.0-edge)), step(edge, t));
+}
+
+void fragment() {
+	vec4 back = textureLod(screen_texture, SCREEN_UV, 0.0);
+	
+	vec2 st = vec2(0.5f, 0.5f);
+	vec3 col =  back.rgb;
+	float alpha = back.a;
+	col = rgb2hsb(col);
+	 //t is distance to rectangle
+	float t = min(min(UV.x, 1.0-UV.x), min(UV.y, 1.0-UV.y));
+	t = texture(curve, vec2(t, 0.5)).r;
+	col.y = mix(col.y, 0.0, t);
+	col.z = mix(col.z, 1.0, t);
+	col = hsb2rgb(col);
+	COLOR = mix(back, vec4(col, alpha), glow);
+	//COLOR = texture(TEXTURE, UV);
+}
+
+void vertex() {
+	// Called for every vertex the material is visible on.
+}
+
+//void light() {
+	// Called for every pixel for every light affecting the CanvasItem.
+	// Uncomment to replace the default light processing function with this one.
+//}
+"
+
+[sub_resource type="Curve" id="Curve_2xkjb"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(0.114583, 0), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="CurveTexture" id="CurveTexture_vyis5"]
+curve = SubResource("Curve_2xkjb")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ffnjl"]
+shader = SubResource("Shader_q17w3")
+shader_parameter/glow = 0.0
+shader_parameter/curve = SubResource("CurveTexture_vyis5")
 
 [node name="Main" type="Node"]
 script = ExtResource("1_46kha")
@@ -35,7 +228,7 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -377.0
+offset_left = -387.0
 offset_top = 7.0
 offset_right = 3.0
 offset_bottom = -5.0
@@ -50,16 +243,11 @@ theme_override_constants/margin_bottom = 20
 layout_mode = 2
 theme_override_constants/separation = 30
 
-[node name="BlackBearOff" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+[node name="WhiteBearOff" parent="MarginContainer/VBoxContainer" instance=ExtResource("7_od7n0")]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_5famj")
-
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/BlackBearOff"]
-layout_mode = 2
-
-[node name="BearOff" parent="MarginContainer/VBoxContainer/BlackBearOff/MarginContainer" instance=ExtResource("7_od7n0")]
-layout_mode = 2
-is_black = true
+theme_override_styles/panel = SubResource("StyleBoxFlat_a7x05")
+shader_material = SubResource("ShaderMaterial_iwov3")
+tile_id = 26
 
 [node name="DiceSpace" type="HSeparator" parent="MarginContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 300)
@@ -105,20 +293,25 @@ layout_mode = 2
 size_flags_horizontal = 8
 ignore_texture_size = true
 
-[node name="WhiteBearOff" type="PanelContainer" parent="MarginContainer/VBoxContainer"]
+[node name="BlackBearOff" parent="MarginContainer/VBoxContainer" instance=ExtResource("7_od7n0")]
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_gcqw2")
+theme_override_styles/panel = SubResource("StyleBoxFlat_0iue8")
+is_black = true
+shader_material = SubResource("ShaderMaterial_ffnjl")
+tile_id = 27
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer/WhiteBearOff"]
-layout_mode = 2
-
-[node name="BearOff" parent="MarginContainer/VBoxContainer/WhiteBearOff/MarginContainer" instance=ExtResource("7_od7n0")]
-layout_mode = 2
-
-[connection signal="black_checker_left" from="Board" to="MarginContainer/VBoxContainer/BlackBearOff/MarginContainer/BearOff" method="_on_board_black_checker_left"]
+[connection signal="black_checker_left" from="Board" to="MarginContainer/VBoxContainer/BlackBearOff" method="_on_board_black_checker_left"]
+[connection signal="can_checker_leave" from="Board" to="MarginContainer/VBoxContainer/WhiteBearOff" method="_on_board_can_checker_leave"]
+[connection signal="can_checker_leave" from="Board" to="MarginContainer/VBoxContainer/BlackBearOff" method="_on_board_can_checker_leave"]
 [connection signal="used_dice" from="Board" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_board_used_dice"]
-[connection signal="white_checker_left" from="Board" to="MarginContainer/VBoxContainer/WhiteBearOff/MarginContainer/BearOff" method="_on_board_white_checker_left"]
+[connection signal="white_checker_left" from="Board" to="MarginContainer/VBoxContainer/WhiteBearOff" method="_on_board_white_checker_left"]
+[connection signal="clicked_on_bear_off" from="MarginContainer/VBoxContainer/WhiteBearOff" to="Board" method="_clicked_on_bear_off"]
 [connection signal="dice_result" from="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" to="Board" method="_on_dice_set_dice_result"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Roll" to="MarginContainer/VBoxContainer/WhiteBearOff" method="_on_roll_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Roll" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_roll_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Roll" to="MarginContainer/VBoxContainer/BlackBearOff" method="_on_roll_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Undo" to="Board" method="_on_undo_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Undo" to="MarginContainer/VBoxContainer/WhiteBearOff" method="_on_undo_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Undo" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_undo_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Undo" to="MarginContainer/VBoxContainer/BlackBearOff" method="_on_undo_pressed"]
+[connection signal="clicked_on_bear_off" from="MarginContainer/VBoxContainer/BlackBearOff" to="Board" method="_clicked_on_bear_off"]
