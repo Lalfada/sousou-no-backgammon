@@ -45,6 +45,16 @@ var roll_values: Array[int] = [1, 1]
 var original_roll_values: Array[int]
 var moves: Dictionary = {}
 
+class Move:
+	var board: Array[int]
+	var steps: Array[int]
+	var remaining_rolls: Array[int]
+	
+	func _init(board: Array[int], steps: Array[int], remaining_rolls: Array[int]):
+		self.board = board
+		self.steps = board
+		self.remaining_rolls = remaining_rolls
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	board_state = default_board.duplicate()
@@ -164,9 +174,9 @@ func update_selection(tile_id: int) -> void:
 
 	
 func play_move(to: int) -> void:
-	used_dice.emit(moves[to][1])
-	board_state = moves[to][0]
-	roll_values = moves[to][2]
+	used_dice.emit(moves[to].steps)
+	board_state = moves[to].board
+	roll_values = moves[to].remaining_rolls
 	clear_selection()
 	update_graphics()
 
@@ -297,7 +307,7 @@ func add_move_sequence(possible_moves: Dictionary, board: Array[int], from: int,
 	var move_direction = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
 	var target_tile = get_actual_position(from) + step * move_direction
 	var new_board: Array = compute_move_sequence(board, from, steps) 
-	possible_moves[target_tile] = [new_board, steps, remaining_rolls]
+	possible_moves[target_tile] = Move.new(new_board, steps, remaining_rolls)
 
 # also note that it assumes valid moves
 func compute_move_sequence(board: Array, from: int, moves: Array) -> Array:
