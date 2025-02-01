@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://cblvobknfqofx"]
+[gd_scene load_steps=6 format=3 uid="uid://cblvobknfqofx"]
 
 [ext_resource type="Texture2D" uid="uid://bmhnjgwnyksso" path="res://assets/Prinbles_Buttons_Analogue_I (v 1.0.1) (9_5_2023)/png@4x/Rect-Light-Default@4x.png" id="1_is2s4"]
 [ext_resource type="Texture2D" uid="uid://6uypqrthqccp" path="res://assets/Prinbles_Buttons_Analogue_I (v 1.0.1) (9_5_2023)/png@4x/Rect-Light-Hover@4x.png" id="2_ab3mw"]
+[ext_resource type="Script" path="res://ui/roll.gd" id="3_k4j7l"]
 [ext_resource type="FontFile" uid="uid://bxhuaj7ji1nlm" path="res://assets/fonts/Bodoni_Moda/BodoniModa-VariableFont_opsz,wght.ttf" id="3_xfyx4"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_fcm2y"]
@@ -15,6 +16,9 @@ offset_bottom = 204.0
 texture_normal = ExtResource("1_is2s4")
 texture_hover = ExtResource("2_ab3mw")
 stretch_mode = 4
+script = ExtResource("3_k4j7l")
+cannot_pass_color = Color(1, 1, 1, 0.392157)
+can_pass_color = Color(1, 1, 1, 1)
 
 [node name="Label" type="Label" parent="."]
 layout_mode = 1

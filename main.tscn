@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://yi2ir1iefj7v"]
+[gd_scene load_steps=18 format=3 uid="uid://yi2ir1iefj7v"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_46kha"]
 [ext_resource type="PackedScene" uid="uid://h0cm7y6ly6bh" path="res://board/board.tscn" id="1_m6jjh"]
@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://chlm3x8aew8b6" path="res://ui/dice_set.tscn" id="4_2qb2t"]
 [ext_resource type="PackedScene" uid="uid://dytk8f6csll3w" path="res://ui/undo.tscn" id="6_jkblc"]
 [ext_resource type="PackedScene" uid="uid://cblvobknfqofx" path="res://ui/roll.tscn" id="6_oreuy"]
-[ext_resource type="Script" path="res://ui/roll.gd" id="7_ndh77"]
 [ext_resource type="PackedScene" uid="uid://cldnjvqh0rvcb" path="res://ui/bear_off.tscn" id="7_od7n0"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a7x05"]
@@ -287,7 +286,6 @@ size_flags_horizontal = 8
 size_flags_vertical = 0
 ignore_texture_size = true
 stretch_mode = 0
-script = ExtResource("7_ndh77")
 
 [node name="Undo" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("6_jkblc")]
 custom_minimum_size = Vector2(170, 100)

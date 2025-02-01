@@ -1,4 +1,3 @@
-extends Node
 class_name Move
 
 var board: Array[int]

@@ -1,4 +1,3 @@
-extends Node
 class_name LeavingCheckers
 
 var whites: int

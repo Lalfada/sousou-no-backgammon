@@ -39,8 +39,8 @@ var is_blacks_turn: bool = false
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	#board_state = Utils.default_board.duplicate()
-	#board_state = Utils.endgame_board.duplicate()
-	board_state = Utils.tough_board.duplicate()
+	board_state = Utils.endgame_board.duplicate()
+	#board_state = Utils.tough_board.duplicate()
 	
 	undo_board_state = board_state.duplicate()
 	original_roll_values = roll_values.duplicate()
@@ -218,12 +218,15 @@ func update_move_list() -> void:
 	var move_counter: int = 0
 	
 	for i in range(Utils.BOARD_MANAGED_TILES):
-		all_possible_moves.push_back(find_possible_moves(i, roll_values))
-		move_counter += all_possible_moves[i].size()
+		if can_select_tile(i):
+			all_possible_moves.push_back(find_possible_moves(i, roll_values))
+			move_counter += all_possible_moves[i].size()
+		else:
+			all_possible_moves.push_back({})
 		
-	SignalBus.can_pass_update.emit(move_counter > 0)
+	SignalBus.can_pass.emit(move_counter == 0)
 	all_moves = all_possible_moves
-	
+		
 
 func find_possible_moves(tile_id: int, rolls: Array[int]) -> Dictionary:
 	assert (not roll_values.has(0))
@@ -269,9 +272,11 @@ func is_move_valid(from: int, step: int) -> bool:
 	# If the the checker is trying to reach the bear off
 	# the check its allowed to do so 
 	if target_tile < 0 or target_tile > 23:
-		if target_tile > 23 and checker_count > 0 and white_can_leave():
+		if target_tile > 23 and checker_count > 0 \
+		and white_can_leave() and white_correct_leave(from, step):
 			return true
-		elif target_tile < 0 and checker_count < 0 and black_can_leave():
+		elif target_tile < 0 and checker_count < 0 \
+		and black_can_leave() and black_correct_leave(from, step):
 			return true
 		else:
 			return false
@@ -281,7 +286,6 @@ func is_move_valid(from: int, step: int) -> bool:
 	# White can move to empty spaces or to a single black checker, 
 	# Black can move to empty spaces or to a single white checker
 	return (checker_count > 0 and target_checker_count >= -1) or (checker_count < 0 and target_checker_count <= 1)
-	
 	
 func white_can_leave() -> bool:
 	# check tiles before leaving area
@@ -304,6 +308,30 @@ func black_can_leave() -> bool:
 	if board_state[25] < 0:
 		return false
 	return true
+	
+# the idea of correct leave is that you may only use a die
+# with a score bigger than you need if there are no checker
+# on which it would be better spent
+func white_correct_leave(from: int, step: int) -> bool:
+	var distance: int = 24 - from
+	var max_dist: int = 0
+	for i in range(18, 24):
+		if board_state[i] > 0:
+			max_dist = 24 - i
+			break
+	return max_dist == distance or step == distance
+	
+func black_correct_leave(from: int, step: int) -> bool:
+	var distance: int = from + 1
+	var max_dist: int = 6
+	for i in range(0, 6):
+		# j is to go from left to right, so we ideed find the max
+		# and not the min
+		var j: int = 5 - i
+		if board_state[j] < 0:
+			max_dist = j + 1
+		break
+	return max_dist == distance or step == distance
 	
 func update_possible_moves(moves: Dictionary) -> void:
 	var tile_positions: Array = get_tile_positions()
