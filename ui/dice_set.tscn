@@ -1,0 +1,31 @@
+[gd_scene load_steps=3 format=3 uid="uid://chlm3x8aew8b6"]
+
+[ext_resource type="PackedScene" uid="uid://cxjyffl36yto7" path="res://ui/die.tscn" id="1_4xf72"]
+[ext_resource type="Script" path="res://ui/dice_set.gd" id="1_v6j17"]
+
+[node name="DiceSet" type="Node2D"]
+script = ExtResource("1_v6j17")
+used_color = Color(1, 1, 1, 0.392157)
+unused_color = Color(1, 1, 1, 1)
+four_dice_offset = Vector2(0, 145)
+metadata/_edit_group_ = true
+
+[node name="Die1" parent="." instance=ExtResource("1_4xf72")]
+position = Vector2(-149.5, 0)
+
+[node name="Die2" parent="." instance=ExtResource("1_4xf72")]
+position = Vector2(158.5, 0)
+
+[node name="Die3" parent="." instance=ExtResource("1_4xf72")]
+visible = false
+position = Vector2(-148.5, -292)
+
+[node name="Die4" parent="." instance=ExtResource("1_4xf72")]
+visible = false
+position = Vector2(152.5, -297)
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 0.6
+one_shot = true
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

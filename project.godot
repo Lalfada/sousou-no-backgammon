@@ -13,12 +13,12 @@ config_version=5
 config/name="Sousou no Backgammon"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
-config/icon="res://img/icon.svg"
+config/icon="res://assets/icon.svg"
 
 [autoload]
 
-Utils="*res://utils.gd"
-SignalBus="*res://signal_bus.gd"
+Utils="*res://scripts/utils.gd"
+SignalBus="*res://scripts/signal_bus.gd"
 
 [display]
 
