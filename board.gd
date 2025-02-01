@@ -1,17 +1,7 @@
 extends Node2D
 class_name Board
 
-signal used_dice(dice: Array)
-signal white_checker_left()
-signal black_checker_left()
 signal can_checker_leave(is_black: bool, can_leave: bool)
-
-const WHITE_BAR: int = 24
-const BLACK_BAR: int = 25
-const WHITE_BEAR_OFF: int = 26
-const BLACK_BEAR_OFF: int = 27
-# these are all the indexes handles by the board
-const BOARD_MANAGED_TILES = 25
 
 # The values here are only educated guesses
 # They're remplaced by distance defined by markers in
@@ -28,33 +18,7 @@ var TOP_START: int = 60
 var COLUMN_HEIGHT: int = 400
 var BAR_HEIGHT: int = 200
 
-# positive values are white checkers
-# negative values are black checkers
-# and zero means no checkers.
-# index 24 is white's eaten pieces and 25 is black's
-# index 26 is white's bear off and 27 is black's
-const default_board: Array[int] = [
-	2, 0, 0, 0, 0, -5,
-	0, -3, 0, 0, 0, 5,
-	-5, 0, 0, 0, 3, 0,
-	5, 0, 0, 0, 0, -2,
-	0, 0,
-	0, 0
-	]
-
-# for debugging purposes
-const endgame_board: Array[int] = [
-	-2, -2, -1, -2, -3, -5,
-	0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0,
-	1, 4, 2, 1, 1, 2,
-	0, 0,
-	0, 0
-	]
-
-
-
-@onready var checker_scene := preload("res://Checker.tscn")
+@onready var checker_scene := preload("res://checker.tscn")
 @onready var light_scene := preload("res://light.tscn")
 var board_state: Array[int] = []
 var undo_board_state: Array[int] = []
@@ -64,36 +28,12 @@ var light_effects: Array[Sprite2D] = []
 var roll_values: Array[int] = [1, 1]
 var original_roll_values: Array[int]
 var moves: Dictionary = {}
-
-class LeavingCheckers:
-	var whites: int
-	var blacks: int
-	
-	func _init(whites: int, blacks: int):
-		self.whites = whites
-		self.blacks = blacks
-		
-	func add(other: LeavingCheckers):
-		whites += other.whites
-		blacks += other.blacks
-
-class Move:
-	var board: Array[int]
-	var steps: Array[int]
-	var remaining_rolls: Array[int]
-	var leaving_checkers: LeavingCheckers
-	
-	func _init(board: Array[int], steps: Array[int], remaining_rolls: Array[int],
-		leaving_checkers: LeavingCheckers):
-		self.board = board
-		self.steps = steps
-		self.remaining_rolls = remaining_rolls
-		self.leaving_checkers = leaving_checkers
-
+var is_blacks_turn: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	board_state = default_board.duplicate()
+	board_state = Utils.default_board.duplicate()
+	#board_state = Utils.endgame_board.duplicate()
 	undo_board_state = board_state.duplicate()
 	original_roll_values = roll_values.duplicate()
 	
@@ -106,11 +46,14 @@ func _ready() -> void:
 	COLUMN_HEIGHT = $BotLeftMarker.position.y - $HeightMarker.position.y
 	BAR_HEIGHT = ($WhiteCaptured.position.y - $BlackCaptured.position.y) / 2
 	
+	SignalBus.dice_result.connect(_on_dice_result)
+
+	
 	update_graphics()
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	pass
 	
 func update_graphics() -> void:
@@ -122,7 +65,7 @@ func update_graphics() -> void:
 	# Define tile positions based on the board array
 	var tile_positions = get_tile_positions()  # A helper function to define tile positions
 	
-	for i in range(BOARD_MANAGED_TILES):
+	for i in range(Utils.BOARD_MANAGED_TILES):
 		var count: int = board_state[i]
 		
 		if count == 0:
@@ -154,8 +97,6 @@ func update_graphics() -> void:
 			add_child(checker_instance)
 
 func get_tile_positions() -> Array:
-	var screen_size : Vector2i = DisplayServer.window_get_size()
-	
 	# Define the positions of each tile on the board
 	# This is an example, customize it based on your board's layout
 	var positions = []
@@ -176,7 +117,7 @@ func get_tile_positions() -> Array:
 func get_tile_id_from_mouse(mouse_pos: Vector2) -> int:
 	# Define a radius for detecting clicks around tile positions
 	var tile_positions: Array = get_tile_positions()
-	var tile_width: int= COLUMN_WIDTH / 2 
+	var tile_width: int = COLUMN_WIDTH / 2 
 	var tile_height: int = COLUMN_HEIGHT
 
 	for i in range(tile_positions.size()):
@@ -213,19 +154,9 @@ func update_selection(tile_id: int) -> void:
 	
 func play_move(to: int) -> void:
 	var move: Move = moves[to]
-	used_dice.emit(move.steps)
+	SignalBus.played_move.emit(move)
 	board_state = move.board
 	roll_values = move.remaining_rolls
-	
-	#print("in play_move")
-	#print(move.steps)
-	#print(board_state)
-	#print(roll_values)
-	
-	for i in range(move.leaving_checkers.whites):
-		white_checker_left.emit()
-	for i in range(move.leaving_checkers.blacks):
-		black_checker_left.emit()
 	
 	clear_selection()
 	update_graphics()
@@ -262,10 +193,6 @@ func find_possible_moves(tile_id: int, rolls: Array[int]) -> Dictionary:
 	
 func recursive_move_search(origin: int, current: int, possible_moves: Dictionary, 
 	rolls: Array[int], remaining_rolls: Array[int], used_rolls: Array[int]) -> void:
-	#print("in recursive_move_search; origin: %d; current: %d" % [origin, current])
-	#print(rolls)
-	#print(remaining_rolls)
-	#print(used_rolls)
 	
 	if rolls.is_empty():
 		if not used_rolls.is_empty():
@@ -346,10 +273,10 @@ func update_possible_moves(moves: Dictionary) -> void:
 			add_child(light)
 			light_effects.push_back(light)
 		else:
-			can_checker_leave.emit(i == BLACK_BEAR_OFF, true)
+			can_checker_leave.emit(i == Utils.BLACK_BEAR_OFF, true)
 
 
-func _on_dice_set_dice_result(rolls: Array[int]) -> void:
+func _on_dice_result(rolls: Array[int]) -> void:
 	clear_selection()
 	undo_board_state = board_state.duplicate()
 	roll_values = rolls.duplicate()
@@ -363,9 +290,9 @@ func add_move_sequence(possible_moves: Dictionary, board: Array[int], from: int,
 	var target_tile = get_actual_position(from) + step * move_direction
 	
 	if target_tile > 23:
-		target_tile = WHITE_BEAR_OFF
+		target_tile = Utils.WHITE_BEAR_OFF
 	elif target_tile < 0:
-		target_tile = BLACK_BEAR_OFF
+		target_tile = Utils.BLACK_BEAR_OFF
 		
 	# we do this check to ensure that when reaching the bear off
 	# we do not use more dice than neccesary
@@ -379,11 +306,6 @@ func add_move_sequence(possible_moves: Dictionary, board: Array[int], from: int,
 	var restulting_state: Array = compute_move_sequence(board, from, steps) 
 	var new_board: Array[int] = restulting_state[0]
 	var leaving_checkers: LeavingCheckers = restulting_state[1]
-	
-	#print("adding move")
-	#print(steps)
-	#print(remaining_rolls)
-	
 	
 	possible_moves[target_tile] = Move.new(new_board, steps, remaining_rolls, leaving_checkers)
 
@@ -419,10 +341,10 @@ func compute_move(board: Array[int],
 	# Check if the the checker is trying to reach the bear off
 	# This is done assuming the checker is allowed to do so
 	if to > 23:
-		new_board[WHITE_BEAR_OFF] += 1
+		new_board[Utils.WHITE_BEAR_OFF] += 1
 		return [new_board, LeavingCheckers.new(1, 0)]
 	elif to < 0:
-		new_board[BLACK_BEAR_OFF] += 1
+		new_board[Utils.BLACK_BEAR_OFF] += 1
 		return [new_board, LeavingCheckers.new(0, 1)]
 	
 	# if there is an enemy checker, hit it

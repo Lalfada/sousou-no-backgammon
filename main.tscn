@@ -300,13 +300,9 @@ is_black = true
 shader_material = SubResource("ShaderMaterial_ffnjl")
 tile_id = 27
 
-[connection signal="black_checker_left" from="Board" to="MarginContainer/VBoxContainer/BlackBearOff" method="_on_board_black_checker_left"]
 [connection signal="can_checker_leave" from="Board" to="MarginContainer/VBoxContainer/WhiteBearOff" method="_on_board_can_checker_leave"]
 [connection signal="can_checker_leave" from="Board" to="MarginContainer/VBoxContainer/BlackBearOff" method="_on_board_can_checker_leave"]
-[connection signal="used_dice" from="Board" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_board_used_dice"]
-[connection signal="white_checker_left" from="Board" to="MarginContainer/VBoxContainer/WhiteBearOff" method="_on_board_white_checker_left"]
 [connection signal="clicked_on_bear_off" from="MarginContainer/VBoxContainer/WhiteBearOff" to="Board" method="_clicked_on_bear_off"]
-[connection signal="dice_result" from="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" to="Board" method="_on_dice_set_dice_result"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Roll" to="MarginContainer/VBoxContainer/WhiteBearOff" method="_on_roll_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Roll" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_roll_pressed"]
 [connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Roll" to="MarginContainer/VBoxContainer/BlackBearOff" method="_on_roll_pressed"]

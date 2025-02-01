@@ -1,9 +1,6 @@
 extends Node2D
 class_name DiceSet
 
-signal dice_result(Array)
-
-
 @export var used_color: Color
 @export var unused_color: Color
 @export var four_dice_offset: Vector2
@@ -18,10 +15,12 @@ func _ready() -> void:
 	default_postion = position
 	original_roll_values = roll_values.duplicate()
 	dice = [$Die1, $Die2, $Die3, $Die4]
+	# Example: Listening for move_made in another script (e.g., Board.gd)
+	SignalBus.played_move.connect(_on_played_move)
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	pass
 
 func roll() -> void:
@@ -59,15 +58,20 @@ func _on_timer_timeout() -> void:
 		position += four_dice_offset
 	
 	original_roll_values = roll_values.duplicate()
-	dice_result.emit(roll_values)
+	SignalBus.dice_result.emit(roll_values)
 	
 
 
 func _on_roll_pressed() -> void:
 	roll()
 
-
-func _on_board_used_dice(used_dice: Array) -> void:
+func _on_undo_pressed() -> void:
+	roll_values = original_roll_values.duplicate()
+	for die in dice:
+		die.modulate = unused_color
+		
+func _on_played_move(move: Move) -> void:
+	var used_dice: Array[int] = move.steps.duplicate()
 	for used_die in used_dice:
 		for i in range(roll_values.size()):
 			if roll_values[i] != used_die:
@@ -75,9 +79,3 @@ func _on_board_used_dice(used_dice: Array) -> void:
 			roll_values[i] = 0
 			dice[i].modulate = used_color
 			break
-
-
-func _on_undo_pressed() -> void:
-	roll_values = original_roll_values.duplicate()
-	for die in dice:
-		die.modulate = unused_color

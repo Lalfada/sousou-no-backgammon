@@ -17,51 +17,49 @@ var glow_value: float = 0.7
 var counter: int = 0
 var validated_counter: int = 0
 
-func add_checker():
-	var checker: ContainedChecker = checker_controle_scene.instantiate()
-	if not is_black:
-		checker.set_white()
-	else:
-		checker.set_black()
-	bear_off_container.add_child(checker)
+func add_checker(number: int):
+	for i in range(number):
+		var checker: ContainedChecker = checker_controle_scene.instantiate()
+		if not is_black:
+			checker.set_white()
+		else:
+			checker.set_black()
+		bear_off_container.add_child(checker)
 	
-func remove_checker():
+func remove_checker(number: int):
 	for child in bear_off_container.get_children():
 		if child.is_in_group("checker"):
+			print("selected child:")
+			print(child)
+			
 			child.queue_free()
-			return
+			
+			number -= 1
+			if number == 0:
+				return
+	print("failded to find a checker to remove")
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# this is done to make each shader unique
 	# usual methodes don't seem to work to ensure shader uniqueness
 	shader_support.material = shader_material.duplicate()
+	SignalBus.played_move.connect(_on_played_move)
+	validated_counter = counter
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(delta: float) -> void:
+func _process(_delta: float) -> void:
 	pass
-
-
-func _on_board_black_checker_left() -> void:
-	if not is_black:
-		return
-	increment()
-
-
-func _on_board_white_checker_left() -> void:
-	if is_black:
-		return
-	increment()
 		
-func increment() -> void:
-	counter += 1
-	add_checker()
+func increment(number: int) -> void:
+	counter += number
+	add_checker(number)
 	label.text = "%d" % counter
 	
-func decrement() -> void:
-	counter -= 1
-	remove_checker()
+func decrement(number: int) -> void:
+	counter -= number
+	remove_checker(number)
 	label.text = "%d" % counter
 	
 func set_glow(t: float) -> void:
@@ -92,9 +90,15 @@ func _on_board_can_checker_leave(is_black: bool, can_leave: bool) -> void:
 
 
 func _on_undo_pressed() -> void:
-	while counter > validated_counter:
-		decrement()
+	decrement(counter - validated_counter)
 
 
 func _on_roll_pressed() -> void:
 	validated_counter = counter
+	
+func _on_played_move(move: Move) -> void:
+	var left_number: int = move.leaving_checkers.blacks \
+		if is_black \
+		else move.leaving_checkers.whites
+		
+	increment(left_number)
