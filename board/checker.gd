@@ -5,6 +5,7 @@ class_name Checker
 
 var is_white: bool = true
 var tile_id: int   = -1
+var stack_id: int = -1
 
 
 # Called when the node enters the scene tree for the first time.
@@ -45,8 +46,9 @@ func stop_glow() -> void:
 	set_glow(0.0)
 
 
-func set_id(new_id: int) -> void:
-	tile_id = new_id
+func set_id(tile_id: int, stack_id: int) -> void:
+	self.tile_id = tile_id
+	self.stack_id = stack_id
 
 
 func get_id() -> int:

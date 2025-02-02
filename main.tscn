@@ -222,6 +222,7 @@ flip_h = true
 
 [node name="Board" parent="." instance=ExtResource("1_m6jjh")]
 is_vs_ai = true
+checker_move_duration = 0.8
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 custom_minimum_size = Vector2(380, 0)

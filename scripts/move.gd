@@ -3,14 +3,17 @@ class_name Move
 var board: Array[int]
 var steps: Array[int]
 var from: int
+var to: int
 var remaining_rolls: Array[int]
 var leaving_checkers: LeavingCheckers
 
-func _init(board: Array[int], steps: Array[int], from: int, remaining_rolls: Array[int],
+func _init(board: Array[int], steps: Array[int], from: int, to: int, 
+	remaining_rolls: Array[int],
 	leaving_checkers: LeavingCheckers):
 	self.board = board
 	self.steps = steps
 	self.from = from
+	self.to = to
 	self.remaining_rolls = remaining_rolls
 	self.leaving_checkers = leaving_checkers
 

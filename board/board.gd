@@ -22,6 +22,9 @@ var BAR_HEIGHT: int = 200
 @export var light_scene: PackedScene
 # we'll assume the ai plays black
 @export var is_vs_ai: bool
+@export var checker_move_duration: float = 1.0
+
+@onready var tile_positions: Array[Vector2] = get_tile_positions()
 
 var board_state: Array[int] = []
 var undo_board_state: Array[int] = []
@@ -72,9 +75,6 @@ func update_graphics() -> void:
 		checker.queue_free()
 	checkers.clear()
 	
-	# Define tile positions based on the board array
-	var tile_positions = get_tile_positions()  # A helper function to define tile positions
-	
 	for i in range(Utils.BOARD_MANAGED_TILES):
 		var count: int = board_state[i]
 		
@@ -90,11 +90,9 @@ func update_graphics() -> void:
 			checkers.push_back(checker_instance)
 			
 			# set checker id
-			checker_instance.set_id(i)
+			checker_instance.set_id(i, j)
 			# Set the position of the checker
-			var stack_direction: int = get_stack_direction(i)
-			var stack_distance: int = CHECKER_SIZE if i < 24 else COMPACT_CHECKER_SIZE
-			checker_instance.position = tile_positions[i] + Vector2(0, j * stack_distance * stack_direction)  # Stack vertically
+			checker_instance.position = compute_checker_position(i, j)
 
 			# Set the color or property of the checker (white/black)
 			if is_white:
@@ -105,10 +103,10 @@ func update_graphics() -> void:
 			# Add the checker instance as a child of the board
 			add_child(checker_instance)
 
-func get_tile_positions() -> Array:
+func get_tile_positions() -> Array[Vector2]:
 	# Define the positions of each tile on the board
 	# This is an example, customize it based on your board's layout
-	var positions = []
+	var positions: Array[Vector2] = []
 	for x in range(6):  # Bottom right
 		positions.push_back(Vector2(RIGHT_START + COLUMN_WIDTH * (5 - x), BOTTOM_START))
 	for x in range(6):  # Bottom left
@@ -125,7 +123,6 @@ func get_tile_positions() -> Array:
 	
 func get_tile_id_from_mouse(mouse_pos: Vector2) -> int:
 	# Define a radius for detecting clicks around tile positions
-	var tile_positions: Array = get_tile_positions()
 	var tile_width: int = COLUMN_WIDTH / 2 
 	var tile_height: int = COLUMN_HEIGHT
 
@@ -192,6 +189,9 @@ func play_move(move: Move) -> void:
 	SignalBus.played_move.emit(move)
 	board_state = move.board
 	roll_values = move.remaining_rolls
+	
+	if is_vs_ai and is_blacks_turn:
+		await animate_checker(move)
 	
 	update_all()
 	
@@ -343,7 +343,6 @@ func black_correct_leave(from: int, step: int) -> bool:
 	return max_dist == distance or step == distance
 	
 func update_possible_moves(moves: Dictionary) -> void:
-	var tile_positions: Array = get_tile_positions()
 	for i: int in moves.keys():
 		if i < 24:
 			var light: Sprite2D = light_scene.instantiate()
@@ -400,7 +399,8 @@ func add_move_sequence(possible_moves: Dictionary, board: Array[int], from: int,
 	assert(leaving_checkers)
 	assert(new_board)
 	
-	possible_moves[target_tile] = Move.new(new_board, steps, from, remaining_rolls, leaving_checkers)
+	possible_moves[target_tile] = Move.new(new_board, steps, from, target_tile,
+		remaining_rolls, leaving_checkers)
 
 # note that it assumes valid moves
 func compute_move_sequence(board: Array[int], from: int, moves: Array[int]) -> Array:
@@ -492,3 +492,25 @@ func play_ai_move() -> void:
 	else:
 		var move_to_play: Move = $Ai.choose_move()
 		play_move(move_to_play)
+
+func compute_checker_position(tile_id: int, checker_number: int) -> Vector2:
+	var stack_direction: int = get_stack_direction(tile_id)
+	var stack_distance: int = CHECKER_SIZE if tile_id < 24 else COMPACT_CHECKER_SIZE
+	var pos: Vector2 = tile_positions[tile_id] \
+		+ Vector2(0, checker_number * stack_distance * stack_direction)  # Stack vertically
+	return pos
+	
+func animate_checker(move: Move) -> void:
+	var final_pos: Vector2 = compute_checker_position(move.to, 0)
+	var checker_to_move: Checker
+	
+	for checker in checkers:
+		if checker.tile_id == move.from:
+			if checker_to_move == null \
+				or checker_to_move.stack_id < checker.stack_id:
+				checker_to_move = checker
+	
+	if checker_to_move:
+		var tween: Tween = get_tree().create_tween()
+		tween.tween_property(checker_to_move, "position", final_pos, 0.5)
+		await tween.finished  # Wait for each move to finish before next
