@@ -221,6 +221,7 @@ expand_mode = 1
 flip_h = true
 
 [node name="Board" parent="." instance=ExtResource("1_m6jjh")]
+is_vs_ai = true
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 custom_minimum_size = Vector2(380, 0)

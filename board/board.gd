@@ -20,6 +20,8 @@ var BAR_HEIGHT: int = 200
 
 @export var checker_scene: PackedScene
 @export var light_scene: PackedScene
+# we'll assume the ai plays black
+@export var is_vs_ai: bool
 
 var board_state: Array[int] = []
 var undo_board_state: Array[int] = []
@@ -38,21 +40,21 @@ var is_blacks_turn: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	#board_state = Utils.default_board.duplicate()
-	board_state = Utils.endgame_board.duplicate()
+	board_state = Utils.default_board.duplicate()
+	#board_state = Utils.endgame_board.duplicate()
 	#board_state = Utils.tough_board.duplicate()
 	
 	undo_board_state = board_state.duplicate()
 	original_roll_values = roll_values.duplicate()
 	
-	VERTICAL_START = $TopMarker.position.y
-	COLUMN_WIDTH = ($Column6Marker.position.x - $BotLeftMarker.position.x) / 5
-	RIGHT_START = $Column7Marker.position.x
-	LEFT_START = $BotLeftMarker.position.x
-	BOTTOM_START = $BotLeftMarker.position.y
-	TOP_START = $TopMarker.position.y
-	COLUMN_HEIGHT = $BotLeftMarker.position.y - $HeightMarker.position.y
-	BAR_HEIGHT = ($WhiteCaptured.position.y - $BlackCaptured.position.y) / 2
+	VERTICAL_START = $Markers/TopMarker.position.y
+	COLUMN_WIDTH = ($Markers/Column6Marker.position.x - $Markers/BotLeftMarker.position.x) / 5
+	RIGHT_START = $Markers/Column7Marker.position.x
+	LEFT_START = $Markers/BotLeftMarker.position.x
+	BOTTOM_START = $Markers/BotLeftMarker.position.y
+	TOP_START = $Markers/TopMarker.position.y
+	COLUMN_HEIGHT = $Markers/BotLeftMarker.position.y - $Markers/HeightMarker.position.y
+	BAR_HEIGHT = ($Markers/WhiteCaptured.position.y - $Markers/BlackCaptured.position.y) / 2
 	
 	SignalBus.dice_result.connect(_on_dice_result)
 	SignalBus.new_turn.connect(_on_new_turn)
@@ -116,8 +118,8 @@ func get_tile_positions() -> Array:
 	for x in range(6):  # Top right
 		positions.push_back(Vector2(RIGHT_START + COLUMN_WIDTH * x, TOP_START))
 		
-	positions.push_back($WhiteCaptured.position)
-	positions.push_back($BlackCaptured.position)
+	positions.push_back($Markers/WhiteCaptured.position)
+	positions.push_back($Markers/BlackCaptured.position)
 
 	return positions
 	
@@ -147,8 +149,11 @@ func _input(event):
 		clicked_on_tile(tile_id)
 
 func clicked_on_tile(tile_id: int) -> void:
+	if not is_receptive_to_input():
+		return
+	
 	if tile_id in moves:
-		play_move(tile_id)
+		play_move(moves[tile_id])
 	else:
 		update_selection(tile_id)
 
@@ -183,13 +188,15 @@ func can_select_tile(tile_id: int) -> bool:
 	
 	return true
 	
-func play_move(to: int) -> void:
-	var move: Move = moves[to]
+func play_move(move: Move) -> void:
 	SignalBus.played_move.emit(move)
 	board_state = move.board
 	roll_values = move.remaining_rolls
 	
 	update_all()
+	
+	if is_vs_ai and is_blacks_turn:
+		play_ai_move()
 	
 
 func clear_selection() -> void:
@@ -264,6 +271,8 @@ func recursive_move_search(origin: int, current: int, possible_moves: Dictionary
 			recursive_move_search(origin, current + roll, possible_moves, 
 			new_rolls, remaining_rolls, new_used_rolls)
 
+# TODO fix bug where checker from the bar can move twice
+# even if other checker is on the bar
 func is_move_valid(from: int, step: int) -> bool:
 	var checker_count = board_state[from]
 	var move_direction = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
@@ -355,6 +364,9 @@ func _on_dice_result(rolls: Array[int]) -> void:
 	update_move_list()
 	clear_selection()
 	
+	if is_vs_ai and is_blacks_turn:
+		play_ai_move()
+	
 	
 func add_move_sequence(possible_moves: Dictionary, board: Array[int], from: int, 
 	steps: Array[int], remaining_rolls: Array[int]) -> void:
@@ -385,7 +397,10 @@ func add_move_sequence(possible_moves: Dictionary, board: Array[int], from: int,
 	var new_board: Array[int] = restulting_state[0]
 	var leaving_checkers: LeavingCheckers = restulting_state[1]
 	
-	possible_moves[target_tile] = Move.new(new_board, steps, remaining_rolls, leaving_checkers)
+	assert(leaving_checkers)
+	assert(new_board)
+	
+	possible_moves[target_tile] = Move.new(new_board, steps, from, remaining_rolls, leaving_checkers)
 
 # note that it assumes valid moves
 func compute_move_sequence(board: Array[int], from: int, moves: Array[int]) -> Array:
@@ -465,3 +480,15 @@ func update_all() -> void:
 
 func array_sum(arr: Array) -> int:
 	return arr.reduce(func(accum, number): return accum + number, 0)
+	
+func is_receptive_to_input() -> bool:
+	return not is_vs_ai or not is_blacks_turn
+
+
+
+func play_ai_move() -> void:
+	if roll_values.is_empty():
+		SignalBus.new_turn.emit()
+	else:
+		var move_to_play: Move = $Ai.choose_move()
+		play_move(move_to_play)
