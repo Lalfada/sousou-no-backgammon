@@ -1,4 +1,5 @@
 extends PanelContainer
+class_name BearOff
 
 signal clicked_on_bear_off(tile_id: int)
 
@@ -17,7 +18,7 @@ var glow_value: float = 0.7
 var counter: int = 0
 var validated_counter: int = 0
 
-func add_checker(number: int):
+func add_checker(number: int) -> void:
 	for i in range(number):
 		var checker: ContainedChecker = checker_controle_scene.instantiate()
 		if not is_black:
@@ -26,7 +27,7 @@ func add_checker(number: int):
 			checker.set_black()
 		bear_off_container.add_child(checker)
 	
-func remove_checker(number: int):
+func remove_checker(number: int) -> void:
 	for child in bear_off_container.get_children():
 		if number == 0:
 			return
@@ -35,6 +36,13 @@ func remove_checker(number: int):
 			child.queue_free()
 			number -= 1
 			
+func remove_all_checker() -> void:
+	for child in bear_off_container.get_children():
+			
+		if child.is_in_group("checker"):
+			child.queue_free()
+	
+			
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	# this is done to make each shader unique
@@ -42,6 +50,8 @@ func _ready() -> void:
 	shader_support.material = shader_material.duplicate()
 	SignalBus.played_move.connect(_on_played_move)
 	SignalBus.new_turn.connect(_on_new_turn)
+	SignalBus.open_menu.connect(_on_open_menu)
+
 	validated_counter = counter
 
 
@@ -99,3 +109,10 @@ func _on_played_move(move: Move) -> void:
 		else move.leaving_checkers.whites
 		
 	increment(left_number)
+	
+func _on_open_menu() -> void:
+	counter = 0
+	validated_counter = 0
+	label.text = "%d" % counter
+	remove_all_checker()
+	

@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://dmg3hti2lnnos"]
+
+[ext_resource type="Theme" uid="uid://cow1ens1awsrh" path="res://ui/base_theme.tres" id="1_1i0kd"]
+[ext_resource type="Script" path="res://ui/go_to_menu.gd" id="2_on4ts"]
+
+[node name="GoToMenu" type="Button"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -163.0
+offset_top = -144.0
+offset_right = 95.0
+offset_bottom = -57.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_1i0kd")
+text = "Go to menu"
+script = ExtResource("2_on4ts")
+
+[connection signal="pressed" from="." to="." method="_on_pressed"]

@@ -1,0 +1,41 @@
+[gd_scene load_steps=3 format=3 uid="uid://dra10yjmu44xb"]
+
+[ext_resource type="Script" path="res://ui/menu.gd" id="1_tetkf"]
+[ext_resource type="Theme" uid="uid://cow1ens1awsrh" path="res://ui/base_theme.tres" id="2_t7q62"]
+
+[node name="Menu" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_tetkf")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 0
+offset_left = -214.0
+offset_right = 414.0
+offset_bottom = 158.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="PvP" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_t7q62")
+text = "Player vs Player"
+
+[node name="Computer" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("2_t7q62")
+text = "Player vs AI"
+
+[connection signal="pressed" from="MarginContainer/VBoxContainer/PvP" to="." method="_on_pv_p_pressed"]
+[connection signal="pressed" from="MarginContainer/VBoxContainer/Computer" to="." method="_on_computer_pressed"]

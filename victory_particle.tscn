@@ -1,0 +1,52 @@
+[gd_scene load_steps=5 format=3 uid="uid://bd35amriax2i7"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_b6wjw"]
+particle_flag_disable_z = true
+emission_shape_offset = Vector3(2000, 0, 0)
+emission_shape = 3
+emission_box_extents = Vector3(2000, 1, 1)
+angle_min = -720.0
+angle_max = 720.0
+direction = Vector3(0, 1, 0)
+spread = 0.0
+initial_velocity_min = 168.78
+initial_velocity_max = 168.78
+angular_velocity_min = -291.65
+angular_velocity_max = 249.11
+gravity = Vector3(0, 0, 0)
+scale_min = 15.0
+scale_max = 15.0
+color = Color(0.735767, 0.415769, 1, 1)
+hue_variation_min = -1.0
+hue_variation_max = 1.0
+
+[sub_resource type="Gradient" id="Gradient_ncegc"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_0f7gm"]
+gradient = SubResource("Gradient_ncegc")
+width = 3
+
+[sub_resource type="GDScript" id="GDScript_mfrw4"]
+script/source = "extends GPUParticles2D
+
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	SignalBus.player_won.connect(_on_player_won)
+
+
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+func _process(delta: float) -> void:
+	pass
+
+func _on_player_won(_winner_is_black: bool) -> void:
+	emitting = true
+"
+
+[node name="VictoryParticle" type="GPUParticles2D"]
+amount = 160
+process_material = SubResource("ParticleProcessMaterial_b6wjw")
+texture = SubResource("GradientTexture1D_0f7gm")
+lifetime = 10.0
+script = SubResource("GDScript_mfrw4")

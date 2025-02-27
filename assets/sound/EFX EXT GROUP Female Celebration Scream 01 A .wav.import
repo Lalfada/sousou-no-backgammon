@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://gwv2nagdrwnb"
+path="res://.godot/imported/EFX EXT GROUP Female Celebration Scream 01 A .wav-45ed117e7c615025148d94e33f2534a3.sample"
+
+[deps]
+
+source_file="res://assets/sound/EFX EXT GROUP Female Celebration Scream 01 A .wav"
+dest_files=["res://.godot/imported/EFX EXT GROUP Female Celebration Scream 01 A .wav-45ed117e7c615025148d94e33f2534a3.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
+compress/mode=0

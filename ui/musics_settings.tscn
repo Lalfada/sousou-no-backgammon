@@ -1,0 +1,51 @@
+[gd_scene load_steps=8 format=3 uid="uid://cxukgqutinb21"]
+
+[ext_resource type="Script" path="res://ui/musics_settings.gd" id="1_y4jfs"]
+[ext_resource type="Theme" uid="uid://cow1ens1awsrh" path="res://ui/base_theme.tres" id="2_4s2l2"]
+[ext_resource type="Texture2D" uid="uid://bmek2ostkdnok" path="res://assets/Prinbles_Buttons_Analogue_I (v 1.0.1) (9_5_2023)/png@2x/Square-Light-Default/Music-On@2x.png" id="3_gk1ia"]
+[ext_resource type="Texture2D" uid="uid://dicjso666xr1e" path="res://assets/Prinbles_Buttons_Analogue_I (v 1.0.1) (9_5_2023)/png@2x/Square-Light-Default/Music-Off@2x.png" id="4_xq48n"]
+[ext_resource type="Texture2D" uid="uid://ci6voy0q7anvv" path="res://assets/Prinbles_Buttons_Analogue_I (v 1.0.1) (9_5_2023)/png@2x/Square-Light-Hover/Music-On@2x.png" id="5_rat5y"]
+[ext_resource type="AudioStream" uid="uid://s46ryitr7c0h" path="res://assets/sound/Sousou no Frieren - Time Flows Ever Onward [ ezmp3.cc ].mp3" id="6_w40oq"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_45wwh"]
+
+[node name="MusicsSettings" type="HBoxContainer"]
+offset_right = 326.0
+offset_bottom = 102.0
+script = ExtResource("1_y4jfs")
+min_volume = -20.735
+max_volume = 14.558
+default_volume = -14.046
+
+[node name="HSlider" type="HSlider" parent="."]
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 4
+theme = ExtResource("2_4s2l2")
+max_value = 1.0
+step = 0.01
+
+[node name="VSeparator" type="VSeparator" parent="."]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_45wwh")
+
+[node name="SoundButton" type="TextureButton" parent="."]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("3_gk1ia")
+texture_pressed = ExtResource("4_xq48n")
+texture_hover = ExtResource("5_rat5y")
+stretch_mode = 4
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_w40oq")
+volume_db = -12.0
+autoplay = true
+parameters/looping = true
+
+[connection signal="value_changed" from="HSlider" to="." method="_on_h_slider_value_changed"]
+[connection signal="toggled" from="SoundButton" to="." method="_on_sound_button_toggled"]

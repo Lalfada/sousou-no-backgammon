@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://s46ryitr7c0h"
+path="res://.godot/imported/Sousou no Frieren - Time Flows Ever Onward [ ezmp3.cc ].mp3-2711c26c746fdd2120f4fc8b6053a9c9.mp3str"
+
+[deps]
+
+source_file="res://assets/sound/Sousou no Frieren - Time Flows Ever Onward [ ezmp3.cc ].mp3"
+dest_files=["res://.godot/imported/Sousou no Frieren - Time Flows Ever Onward [ ezmp3.cc ].mp3-2711c26c746fdd2120f4fc8b6053a9c9.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

@@ -21,6 +21,8 @@ func _ready() -> void:
 	# Example: Listening for move_made in another script (e.g., Board.gd)
 	SignalBus.played_move.connect(_on_played_move)
 	SignalBus.new_turn.connect(_on_new_turn)
+	SignalBus.start_game.connect(_on_start_game)
+
 
 
 
@@ -93,3 +95,13 @@ func _on_played_move(move: Move) -> void:
 			roll_values[i] = 0
 			dice[i].modulate = used_color
 			break
+			
+func set_color(is_black: bool) -> void:
+	var color_id = 1 if is_black else 0
+	for die in dice:
+		die.animation = animation_names[color_id]
+		
+func _on_start_game() -> void:
+	# set white
+	set_color(false)
+	roll()

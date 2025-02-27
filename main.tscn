@@ -1,12 +1,18 @@
-[gd_scene load_steps=18 format=3 uid="uid://yi2ir1iefj7v"]
+[gd_scene load_steps=26 format=3 uid="uid://yi2ir1iefj7v"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_46kha"]
 [ext_resource type="PackedScene" uid="uid://h0cm7y6ly6bh" path="res://board/board.tscn" id="1_m6jjh"]
 [ext_resource type="Texture2D" uid="uid://cr58w4j6k0m4n" path="res://assets/background2.jpg" id="3_wufsu"]
 [ext_resource type="PackedScene" uid="uid://chlm3x8aew8b6" path="res://ui/dice_set.tscn" id="4_2qb2t"]
+[ext_resource type="Script" path="res://play_ui.gd" id="4_p3nl1"]
 [ext_resource type="PackedScene" uid="uid://dytk8f6csll3w" path="res://ui/undo.tscn" id="6_jkblc"]
 [ext_resource type="PackedScene" uid="uid://cblvobknfqofx" path="res://ui/roll.tscn" id="6_oreuy"]
+[ext_resource type="PackedScene" uid="uid://cxukgqutinb21" path="res://ui/musics_settings.tscn" id="7_7oye1"]
 [ext_resource type="PackedScene" uid="uid://cldnjvqh0rvcb" path="res://ui/bear_off.tscn" id="7_od7n0"]
+[ext_resource type="PackedScene" uid="uid://bd35amriax2i7" path="res://victory_particle.tscn" id="8_7x2ec"]
+[ext_resource type="PackedScene" uid="uid://2dalevqa73j7" path="res://ui/victory_label.tscn" id="9_n86lc"]
+[ext_resource type="PackedScene" uid="uid://dmg3hti2lnnos" path="res://go_to_menu.tscn" id="10_hjlhi"]
+[ext_resource type="PackedScene" uid="uid://dra10yjmu44xb" path="res://ui/menu.tscn" id="10_m1xfl"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a7x05"]
 bg_color = Color(0.25098, 0, 0.364706, 0.643137)
@@ -108,6 +114,10 @@ curve = SubResource("Curve_foah1")
 shader = SubResource("Shader_m3enf")
 shader_parameter/glow = 0.0
 shader_parameter/curve = SubResource("CurveTexture_f8l04")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_e7tg2"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ehfxy"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0iue8"]
 bg_color = Color(0.556863, 0, 0.0941176, 0.6)
@@ -220,42 +230,52 @@ texture = ExtResource("3_wufsu")
 expand_mode = 1
 flip_h = true
 
-[node name="Board" parent="." instance=ExtResource("1_m6jjh")]
+[node name="Board" parent="." node_paths=PackedStringArray("black_bear_off", "white_bear_off") instance=ExtResource("1_m6jjh")]
+black_bear_off = NodePath("../UI/PlayUI/VBoxContainer/BlackBearOff")
+white_bear_off = NodePath("../UI/PlayUI/VBoxContainer/WhiteBearOff")
 is_vs_ai = true
 checker_move_duration = 0.8
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PlayUI" type="MarginContainer" parent="UI"]
 custom_minimum_size = Vector2(380, 0)
+layout_mode = 1
 anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -387.0
-offset_top = 7.0
-offset_right = 3.0
-offset_bottom = -5.0
+offset_left = -390.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_constants/margin_left = 20
 theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
+script = ExtResource("4_p3nl1")
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UI/PlayUI"]
 layout_mode = 2
 theme_override_constants/separation = 30
 
-[node name="WhiteBearOff" parent="MarginContainer/VBoxContainer" instance=ExtResource("7_od7n0")]
+[node name="WhiteBearOff" parent="UI/PlayUI/VBoxContainer" instance=ExtResource("7_od7n0")]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_a7x05")
 shader_material = SubResource("ShaderMaterial_iwov3")
 tile_id = 26
 
-[node name="DiceSpace" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="DiceSpace" type="HSeparator" parent="UI/PlayUI/VBoxContainer"]
 custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
+theme_override_styles/separator = SubResource("StyleBoxEmpty_e7tg2")
 
-[node name="DiceRoot" type="Control" parent="MarginContainer/VBoxContainer/DiceSpace"]
+[node name="DiceRoot" type="Control" parent="UI/PlayUI/VBoxContainer/DiceSpace"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -269,19 +289,23 @@ offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="DiceSet" parent="MarginContainer/VBoxContainer/DiceSpace/DiceRoot" instance=ExtResource("4_2qb2t")]
+[node name="DiceSet" parent="UI/PlayUI/VBoxContainer/DiceSpace/DiceRoot" instance=ExtResource("4_2qb2t")]
 position = Vector2(20, 24)
 scale = Vector2(0.598, 0.6)
 
-[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="UI/PlayUI/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_styles/separator = SubResource("StyleBoxEmpty_ehfxy")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="MusicsSettings" parent="UI/PlayUI/VBoxContainer" instance=ExtResource("7_7oye1")]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/PlayUI/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Pass" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("6_oreuy")]
+[node name="Pass" parent="UI/PlayUI/VBoxContainer/HBoxContainer" instance=ExtResource("6_oreuy")]
 custom_minimum_size = Vector2(170, 100)
 layout_mode = 2
 size_flags_horizontal = 8
@@ -289,25 +313,68 @@ size_flags_vertical = 0
 ignore_texture_size = true
 stretch_mode = 0
 
-[node name="Undo" parent="MarginContainer/VBoxContainer/HBoxContainer" instance=ExtResource("6_jkblc")]
+[node name="Undo" parent="UI/PlayUI/VBoxContainer/HBoxContainer" instance=ExtResource("6_jkblc")]
 custom_minimum_size = Vector2(170, 100)
 layout_mode = 2
 size_flags_horizontal = 8
 ignore_texture_size = true
 
-[node name="BlackBearOff" parent="MarginContainer/VBoxContainer" instance=ExtResource("7_od7n0")]
+[node name="BlackBearOff" parent="UI/PlayUI/VBoxContainer" instance=ExtResource("7_od7n0")]
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_0iue8")
 is_black = true
 shader_material = SubResource("ShaderMaterial_ffnjl")
 tile_id = 27
 
-[connection signal="can_checker_leave" from="Board" to="MarginContainer/VBoxContainer/WhiteBearOff" method="_on_board_can_checker_leave"]
-[connection signal="can_checker_leave" from="Board" to="MarginContainer/VBoxContainer/BlackBearOff" method="_on_board_can_checker_leave"]
-[connection signal="clicked_on_bear_off" from="MarginContainer/VBoxContainer/WhiteBearOff" to="Board" method="_clicked_on_bear_off"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Pass" to="MarginContainer/VBoxContainer/HBoxContainer/Pass" method="_on_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Undo" to="Board" method="_on_undo_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Undo" to="MarginContainer/VBoxContainer/WhiteBearOff" method="_on_undo_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Undo" to="MarginContainer/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_undo_pressed"]
-[connection signal="pressed" from="MarginContainer/VBoxContainer/HBoxContainer/Undo" to="MarginContainer/VBoxContainer/BlackBearOff" method="_on_undo_pressed"]
-[connection signal="clicked_on_bear_off" from="MarginContainer/VBoxContainer/BlackBearOff" to="Board" method="_clicked_on_bear_off"]
+[node name="MainMenu" parent="UI" instance=ExtResource("10_m1xfl")]
+layout_mode = 1
+
+[node name="VictoryScreen" type="Control" parent="UI"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VictoryLabel" parent="UI/VictoryScreen" instance=ExtResource("9_n86lc")]
+visible = false
+layout_mode = 1
+offset_left = -3713.0
+offset_top = -406.0
+offset_right = -2771.0
+offset_bottom = -212.0
+
+[node name="GoToMenu" parent="UI/VictoryScreen" instance=ExtResource("10_hjlhi")]
+visible = false
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = -40.0
+offset_top = 125.0
+offset_right = 218.0
+offset_bottom = 212.0
+grow_horizontal = 1
+grow_vertical = 1
+
+[node name="VictoryParticle" parent="." instance=ExtResource("8_7x2ec")]
+emitting = false
+
+[connection signal="can_checker_leave" from="Board" to="UI/PlayUI/VBoxContainer/WhiteBearOff" method="_on_board_can_checker_leave"]
+[connection signal="can_checker_leave" from="Board" to="UI/PlayUI/VBoxContainer/BlackBearOff" method="_on_board_can_checker_leave"]
+[connection signal="clicked_on_bear_off" from="UI/PlayUI/VBoxContainer/WhiteBearOff" to="Board" method="_clicked_on_bear_off"]
+[connection signal="pressed" from="UI/PlayUI/VBoxContainer/HBoxContainer/Pass" to="UI/PlayUI/VBoxContainer/HBoxContainer/Pass" method="_on_pressed"]
+[connection signal="pressed" from="UI/PlayUI/VBoxContainer/HBoxContainer/Undo" to="Board" method="_on_undo_pressed"]
+[connection signal="pressed" from="UI/PlayUI/VBoxContainer/HBoxContainer/Undo" to="UI/PlayUI/VBoxContainer/WhiteBearOff" method="_on_undo_pressed"]
+[connection signal="pressed" from="UI/PlayUI/VBoxContainer/HBoxContainer/Undo" to="UI/PlayUI/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_undo_pressed"]
+[connection signal="pressed" from="UI/PlayUI/VBoxContainer/HBoxContainer/Undo" to="UI/PlayUI/VBoxContainer/BlackBearOff" method="_on_undo_pressed"]
+[connection signal="clicked_on_bear_off" from="UI/PlayUI/VBoxContainer/BlackBearOff" to="Board" method="_clicked_on_bear_off"]

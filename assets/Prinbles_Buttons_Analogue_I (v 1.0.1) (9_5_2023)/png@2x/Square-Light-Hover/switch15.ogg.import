@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://by2die83ilgj6"
+path="res://.godot/imported/switch15.ogg-171085a84294fcb668fc0c5db2eabbe4.oggvorbisstr"
+
+[deps]
+
+source_file="res://assets/Prinbles_Buttons_Analogue_I (v 1.0.1) (9_5_2023)/png@2x/Square-Light-Hover/switch15.ogg"
+dest_files=["res://.godot/imported/switch15.ogg-171085a84294fcb668fc0c5db2eabbe4.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

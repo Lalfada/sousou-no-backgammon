@@ -10,7 +10,7 @@ font = ExtResource("3_xfyx4")
 font_size = 40
 font_color = Color(0, 0, 0, 1)
 
-[node name="Roll" type="TextureButton"]
+[node name="Roll" type="TextureButton" groups=["in_game_button"]]
 offset_right = 301.0
 offset_bottom = 204.0
 texture_normal = ExtResource("1_is2s4")

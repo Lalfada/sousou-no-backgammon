@@ -40,3 +40,13 @@ const tough_board: Array[int] = [
 	4, 0,
 	0, 0
 	]
+	
+# for debugging purposes
+const done_board: Array[int] = [
+	0, 0, 0, 0, 0, -1,
+	0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 1,
+	0, 0,
+	0, 0
+	]

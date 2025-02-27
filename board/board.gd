@@ -20,6 +20,8 @@ var BAR_HEIGHT: int = 200
 
 @export var checker_scene: PackedScene
 @export var light_scene: PackedScene
+@export var black_bear_off: BearOff
+@export var white_bear_off: BearOff
 # we'll assume the ai plays black
 @export var is_vs_ai: bool
 @export var checker_move_duration: float = 1.0
@@ -40,6 +42,7 @@ var all_moves: Array[Dictionary]
 # it represents the moves presented to the player
 var moves: Dictionary = {}
 var is_blacks_turn: bool = false
+var is_interactable: bool = true
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -61,6 +64,9 @@ func _ready() -> void:
 	
 	SignalBus.dice_result.connect(_on_dice_result)
 	SignalBus.new_turn.connect(_on_new_turn)
+	SignalBus.start_game.connect(_on_start_game)
+	SignalBus.set_play_mode.connect(_on_set_play_mode)
+
 	
 	update_all()
 
@@ -122,6 +128,8 @@ func get_tile_positions() -> Array[Vector2]:
 	return positions
 	
 func get_tile_id_from_mouse(mouse_pos: Vector2) -> int:
+	# ensures that no matter the board size the input detection works fine
+	mouse_pos = Vector2(mouse_pos.x / scale.x, mouse_pos.y / scale.y)
 	# Define a radius for detecting clicks around tile positions
 	var tile_width: int = COLUMN_WIDTH / 2 
 	var tile_height: int = COLUMN_HEIGHT
@@ -167,6 +175,9 @@ func update_selection(tile_id: int) -> void:
 	update_possible_moves(moves)
 
 func can_select_tile(tile_id: int) -> bool:
+	if tile_id == Utils.BLACK_BAR or tile_id == Utils.WHITE_BEAR_OFF:
+		return false
+	
 	var checker_count = board_state[tile_id]
 	
 	if checker_count == 0:
@@ -186,7 +197,12 @@ func can_select_tile(tile_id: int) -> bool:
 	return true
 	
 func play_move(move: Move) -> void:
+	
 	SignalBus.played_move.emit(move)
+	
+	if move.win_state != 0:
+		SignalBus.player_won.emit(is_blacks_turn)
+		is_interactable = false
 	board_state = move.board
 	roll_values = move.remaining_rolls
 	
@@ -265,7 +281,7 @@ func recursive_move_search(origin: int, current: int, possible_moves: Dictionary
 		new_remaining_rolls, used_rolls)
 		
 		# Or add it
-		if is_move_valid(origin, roll + current):
+		if is_move_valid(origin, roll + current, used_rolls):
 			var new_used_rolls = used_rolls.duplicate()
 			new_used_rolls.push_back(roll)
 			recursive_move_search(origin, current + roll, possible_moves, 
@@ -273,7 +289,7 @@ func recursive_move_search(origin: int, current: int, possible_moves: Dictionary
 
 # TODO fix bug where checker from the bar can move twice
 # even if other checker is on the bar
-func is_move_valid(from: int, step: int) -> bool:
+func is_move_valid(from: int, step: int,  used_rolls: Array[int]) -> bool:
 	var checker_count = board_state[from]
 	var move_direction = 1 if checker_count > 0 else -1  # White moves forward (+1), black moves backward (-1)
 	var target_tile = get_actual_position(from) + step * move_direction
@@ -395,12 +411,37 @@ func add_move_sequence(possible_moves: Dictionary, board: Array[int], from: int,
 	var restulting_state: Array = compute_move_sequence(board, from, steps) 
 	var new_board: Array[int] = restulting_state[0]
 	var leaving_checkers: LeavingCheckers = restulting_state[1]
+	var win_state: int = compute_win_state(new_board)
 	
 	assert(leaving_checkers)
 	assert(new_board)
 	
-	possible_moves[target_tile] = Move.new(new_board, steps, from, target_tile,
+	possible_moves[target_tile] = Move.new(new_board, steps, from, target_tile, win_state,
 		remaining_rolls, leaving_checkers)
+		
+func compute_win_state(board: Array[int]) -> int:
+	var white_wins: bool = true
+	for i in range(24):
+		if board[i] > 0:
+			white_wins = false
+			break
+	if board[Utils.WHITE_BAR] > 0:
+		white_wins = false
+	if white_wins:
+		return 1
+		
+	var black_wins: bool = true
+	for i in range(24):
+		if board[i] < 0:
+			black_wins = false
+			break	
+	if board[Utils.BLACK_BAR] > 0:
+		black_wins = false
+	if black_wins:
+		return -1
+		
+	return 0
+	
 
 # note that it assumes valid moves
 func compute_move_sequence(board: Array[int], from: int, moves: Array[int]) -> Array:
@@ -482,20 +523,28 @@ func array_sum(arr: Array) -> int:
 	return arr.reduce(func(accum, number): return accum + number, 0)
 	
 func is_receptive_to_input() -> bool:
-	return not is_vs_ai or not is_blacks_turn
+	return is_interactable and (not is_vs_ai or not is_blacks_turn)
 
 
 
 func play_ai_move() -> void:
-	if roll_values.is_empty():
-		SignalBus.new_turn.emit()
-	else:
-		var move_to_play: Move = $Ai.choose_move()
+	var move_to_play: Move = $Ai.choose_move()
+	# if there are no legal move the ai returns null
+	if move_to_play:
 		play_move(move_to_play)
+	else:
+		SignalBus.new_turn.emit()
+
 
 func compute_checker_position(tile_id: int, checker_number: int) -> Vector2:
+	if tile_id == Utils.BLACK_BEAR_OFF:
+		return black_bear_off.global_position
+	if tile_id == Utils.WHITE_BEAR_OFF:
+		return white_bear_off.global_position
+	
 	var stack_direction: int = get_stack_direction(tile_id)
 	var stack_distance: int = CHECKER_SIZE if tile_id < 24 else COMPACT_CHECKER_SIZE
+
 	var pos: Vector2 = tile_positions[tile_id] \
 		+ Vector2(0, checker_number * stack_distance * stack_direction)  # Stack vertically
 	return pos
@@ -514,3 +563,20 @@ func animate_checker(move: Move) -> void:
 		var tween: Tween = get_tree().create_tween()
 		tween.tween_property(checker_to_move, "position", final_pos, 0.5)
 		await tween.finished  # Wait for each move to finish before next
+
+func _on_start_game() -> void:
+	#board_state = Utils.default_board.duplicate()
+	#board_state = Utils.endgame_board.duplicate()
+	board_state = Utils.done_board.duplicate()
+	# we want white to go first
+	is_blacks_turn = false
+	is_interactable = true
+	# we're waiting to receive the rolls
+	# in the meantime we don't wanna be able to play anithing
+	roll_values = []
+	original_roll_values = []
+	
+	update_all()
+
+func _on_set_play_mode(is_vs_ai: bool):
+	self.is_vs_ai = is_vs_ai

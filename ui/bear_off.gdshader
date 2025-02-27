@@ -55,7 +55,7 @@ float mix2(float edge, float mid, float t) {
 
 void fragment() {
 	vec4 back = textureLod(screen_texture, SCREEN_UV, 0.0);
-	
+
 	vec2 st = vec2(0.5f, 0.5f);
 	vec3 col =  back.rgb;
 	float alpha = back.a;

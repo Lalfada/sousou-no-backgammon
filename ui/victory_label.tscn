@@ -1,0 +1,141 @@
+[gd_scene load_steps=10 format=3 uid="uid://2dalevqa73j7"]
+
+[ext_resource type="FontFile" uid="uid://dsp7sd0hon0jp" path="res://assets/fonts/Bodoni_Moda,Bungee_Inline,Bungee_Spice/Bungee_Inline/BungeeInline-Regular.ttf" id="1_4mpsq"]
+[ext_resource type="Script" path="res://ui/victory_label.gd" id="1_m13ok"]
+[ext_resource type="Animation" uid="uid://b2h62a0dmbg3f" path="res://ui/color_variation.res" id="3_3dd34"]
+
+[sub_resource type="Theme" id="Theme_3dp8e"]
+default_font = ExtResource("1_4mpsq")
+default_font_size = 140
+
+[sub_resource type="Animation" id="Animation_1si2t"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(10, 10)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-3693, -386)]
+}
+tracks/2/type = "bezier"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath(".:modulate:r")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/3/type = "bezier"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath(".:modulate:g")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+tracks/4/type = "bezier"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath(".:modulate:b")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"handle_modes": PackedInt32Array(0),
+"points": PackedFloat32Array(0, -0.25, 0, 0.25, 0),
+"times": PackedFloat32Array(0)
+}
+
+[sub_resource type="Animation" id="Animation_4l16a"]
+resource_name = "appear"
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(10, 10), Vector2(1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath(".:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-4560, -910), Vector2(-333, -73)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_4h6i1"]
+_data = {
+"RESET": SubResource("Animation_1si2t"),
+"appear": SubResource("Animation_4l16a"),
+"color_variation": ExtResource("3_3dd34")
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_fnegd"]
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_ruose"]
+_data = {
+"color_variation": ExtResource("3_3dd34")
+}
+
+[node name="VictoryLabel" type="RichTextLabel"]
+modulate = Color(0, 0, 0, 1)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1293.0
+offset_top = -613.0
+offset_right = -351.0
+offset_bottom = -419.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(10, 10)
+theme = SubResource("Theme_3dp8e")
+bbcode_enabled = true
+text = "[wave amp=50.0 freq=5.0 connected=1]WHITE WINS[/wave]"
+autowrap_mode = 0
+script = ExtResource("1_m13ok")
+
+[node name="AppearAnimation" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_4h6i1"),
+"VictoryLabelText": SubResource("AnimationLibrary_fnegd")
+}
+
+[node name="ColorAnimation" type="AnimationPlayer" parent="."]
+libraries = {
+"ColorAnimation": SubResource("AnimationLibrary_ruose")
+}

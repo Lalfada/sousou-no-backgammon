@@ -1,0 +1,26 @@
+[gd_scene load_steps=6 format=3 uid="uid://b8bwavn7tq4ya"]
+
+[ext_resource type="Texture2D" uid="uid://bmek2ostkdnok" path="res://assets/Prinbles_Buttons_Analogue_I (v 1.0.1) (9_5_2023)/png@2x/Square-Light-Default/Music-On@2x.png" id="1_ona8m"]
+[ext_resource type="Texture2D" uid="uid://dicjso666xr1e" path="res://assets/Prinbles_Buttons_Analogue_I (v 1.0.1) (9_5_2023)/png@2x/Square-Light-Default/Music-Off@2x.png" id="2_4cl2k"]
+[ext_resource type="Texture2D" uid="uid://ci6voy0q7anvv" path="res://assets/Prinbles_Buttons_Analogue_I (v 1.0.1) (9_5_2023)/png@2x/Square-Light-Hover/Music-On@2x.png" id="3_5tban"]
+[ext_resource type="AudioStream" uid="uid://s46ryitr7c0h" path="res://assets/sound/Sousou no Frieren - Time Flows Ever Onward [ ezmp3.cc ].mp3" id="4_0vrwl"]
+[ext_resource type="Script" path="res://ui/musics_settings.gd" id="4_nw74n"]
+
+[node name="SoundButton" type="TextureButton"]
+offset_right = 205.0
+offset_bottom = 204.0
+size_flags_horizontal = 4
+size_flags_vertical = 4
+toggle_mode = true
+texture_normal = ExtResource("1_ona8m")
+texture_pressed = ExtResource("2_4cl2k")
+texture_hover = ExtResource("3_5tban")
+stretch_mode = 4
+script = ExtResource("4_nw74n")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_0vrwl")
+autoplay = true
+parameters/looping = true
+
+[connection signal="toggled" from="." to="." method="_on_toggled"]
