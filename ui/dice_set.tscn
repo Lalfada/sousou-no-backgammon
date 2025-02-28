@@ -1,17 +1,147 @@
-[gd_scene load_steps=3 format=3 uid="uid://chlm3x8aew8b6"]
+[gd_scene load_steps=9 format=3 uid="uid://chlm3x8aew8b6"]
 
 [ext_resource type="PackedScene" uid="uid://cxjyffl36yto7" path="res://ui/die.tscn" id="1_4xf72"]
 [ext_resource type="Script" path="res://ui/dice_set.gd" id="1_v6j17"]
+[ext_resource type="PackedScene" uid="uid://bk01mswju7xo2" path="res://board/duel_win_effect.tscn" id="2_bjr8m"]
+[ext_resource type="AudioStream" uid="uid://cbbretqtfqkdd" path="res://assets/sound/DICE on Felt, Throw and Roll, Standard, 5 Five Dice, v2.wav" id="4_tiaja"]
+[ext_resource type="AudioStream" uid="uid://cwfo55m5nb0ej" path="res://assets/sound/DICE on Felt, Throw and Roll, Standard, 16 Sixteen Dice, v1.wav" id="5_r38x5"]
 
-[node name="DiceSet" type="Node2D"]
+[sub_resource type="Animation" id="Animation_whwkn"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Die1:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(-148, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Die2:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(158.5, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_4f03u"]
+resource_name = "initial_rolls"
+length = 5.0
+step = 0.1
+tracks/0/type = "method"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 2.6, 3.6, 5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"values": [{
+"args": [],
+"method": &"roll_duel_values"
+}, {
+"args": [],
+"method": &"play_random_roll_sound"
+}, {
+"args": [],
+"method": &"display_duel_results"
+}, {
+"args": [],
+"method": &"convert_dice_colors"
+}, {
+"args": [],
+"method": &"roll"
+}]
+}
+tracks/1/type = "method"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Die1")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(1, 2.5),
+"transitions": PackedFloat32Array(1, 1),
+"values": [{
+"args": [&"", 1.0, false],
+"method": &"play"
+}, {
+"args": [],
+"method": &"stop"
+}]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Die2:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.6, 4.53333, 5),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(158.5, 0), Vector2(-1950, 400), Vector2(-1950, 400), Vector2(158.5, 0)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Die1:position")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.633333, 4.53333, 5),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(-148, 0), Vector2(-750, 400), Vector2(-750, 400), Vector2(-148, 0)]
+}
+tracks/4/type = "method"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Die2")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(1, 2.5),
+"transitions": PackedFloat32Array(1, 1),
+"values": [{
+"args": [&"", 1.0, false],
+"method": &"play"
+}, {
+"args": [],
+"method": &"stop"
+}]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_cj208"]
+_data = {
+"RESET": SubResource("Animation_whwkn"),
+"initial_rolls": SubResource("Animation_4f03u")
+}
+
+[node name="DiceSet" type="Node2D" node_paths=PackedStringArray("roll_sound1", "roll_sound2")]
+position = Vector2(1769, 208)
 script = ExtResource("1_v6j17")
 used_color = Color(1, 1, 1, 0.392157)
 unused_color = Color(1, 1, 1, 1)
 four_dice_offset = Vector2(0, 145)
+fireworks_effect = ExtResource("2_bjr8m")
+roll_sound1 = NodePath("DiceSound1")
+roll_sound2 = NodePath("DiceSound2")
 metadata/_edit_group_ = true
 
 [node name="Die1" parent="." instance=ExtResource("1_4xf72")]
-position = Vector2(-149.5, 0)
+position = Vector2(-148, 0)
+frame_progress = 0.0
 
 [node name="Die2" parent="." instance=ExtResource("1_4xf72")]
 position = Vector2(158.5, 0)
@@ -27,5 +157,16 @@ position = Vector2(152.5, -297)
 [node name="Timer" type="Timer" parent="."]
 wait_time = 0.6
 one_shot = true
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_cj208")
+}
+
+[node name="DiceSound1" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("4_tiaja")
+
+[node name="DiceSound2" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("5_r38x5")
 
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

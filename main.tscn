@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://yi2ir1iefj7v"]
+[gd_scene load_steps=27 format=3 uid="uid://yi2ir1iefj7v"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_46kha"]
 [ext_resource type="PackedScene" uid="uid://h0cm7y6ly6bh" path="res://board/board.tscn" id="1_m6jjh"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://2dalevqa73j7" path="res://ui/victory_label.tscn" id="9_n86lc"]
 [ext_resource type="PackedScene" uid="uid://dmg3hti2lnnos" path="res://go_to_menu.tscn" id="10_hjlhi"]
 [ext_resource type="PackedScene" uid="uid://dra10yjmu44xb" path="res://ui/menu.tscn" id="10_m1xfl"]
+[ext_resource type="PackedScene" uid="uid://dr5dnlpvk5jmi" path="res://ui/game_sounds.tscn" id="14_onsfa"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a7x05"]
 bg_color = Color(0.25098, 0, 0.364706, 0.643137)
@@ -369,6 +370,8 @@ grow_vertical = 1
 [node name="VictoryParticle" parent="." instance=ExtResource("8_7x2ec")]
 emitting = false
 
+[node name="GameSounds" parent="." instance=ExtResource("14_onsfa")]
+
 [connection signal="can_checker_leave" from="Board" to="UI/PlayUI/VBoxContainer/WhiteBearOff" method="_on_board_can_checker_leave"]
 [connection signal="can_checker_leave" from="Board" to="UI/PlayUI/VBoxContainer/BlackBearOff" method="_on_board_can_checker_leave"]
 [connection signal="clicked_on_bear_off" from="UI/PlayUI/VBoxContainer/WhiteBearOff" to="Board" method="_clicked_on_bear_off"]
@@ -377,4 +380,5 @@ emitting = false
 [connection signal="pressed" from="UI/PlayUI/VBoxContainer/HBoxContainer/Undo" to="UI/PlayUI/VBoxContainer/WhiteBearOff" method="_on_undo_pressed"]
 [connection signal="pressed" from="UI/PlayUI/VBoxContainer/HBoxContainer/Undo" to="UI/PlayUI/VBoxContainer/DiceSpace/DiceRoot/DiceSet" method="_on_undo_pressed"]
 [connection signal="pressed" from="UI/PlayUI/VBoxContainer/HBoxContainer/Undo" to="UI/PlayUI/VBoxContainer/BlackBearOff" method="_on_undo_pressed"]
+[connection signal="pressed" from="UI/PlayUI/VBoxContainer/HBoxContainer/Undo" to="GameSounds" method="_on_undo"]
 [connection signal="clicked_on_bear_off" from="UI/PlayUI/VBoxContainer/BlackBearOff" to="Board" method="_clicked_on_bear_off"]

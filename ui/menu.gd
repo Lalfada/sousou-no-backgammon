@@ -13,11 +13,13 @@ func _process(delta: float) -> void:
 
 
 func _on_pv_p_pressed() -> void:
+	SignalBus.menu_pressed.emit()
 	SignalBus.set_play_mode.emit(false)
 	start_game()
 
 
 func _on_computer_pressed() -> void:
+	SignalBus.menu_pressed.emit()
 	SignalBus.set_play_mode.emit(true)
 	start_game()
 

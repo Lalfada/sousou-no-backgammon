@@ -6,12 +6,20 @@ const animation_names: Array[String] = ["purple", "red"]
 @export var used_color: Color
 @export var unused_color: Color
 @export var four_dice_offset: Vector2
+@export var fireworks_effect: PackedScene
+@export var roll_sound1: AudioStreamPlayer
+@export var roll_sound2: AudioStreamPlayer
+@export var sound_max_pitch: float
+@export var sound_min_pitch: float
 
+@onready var roll_sounds: Array[AudioStreamPlayer] = [roll_sound1, roll_sound2]
 var default_postion: Vector2
 var roll_values: Array[int] = [1, 1, 1, 1]
 var original_roll_values: Array[int]
 var is_rolling: bool = false
 var dice: Array[AnimatedSprite2D]
+var white_starting_roll: int = 0
+var black_starting_roll: int = 0
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -23,17 +31,11 @@ func _ready() -> void:
 	SignalBus.new_turn.connect(_on_new_turn)
 	SignalBus.start_game.connect(_on_start_game)
 
-
-
-
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-func _process(_delta: float) -> void:
-	pass
-
 func roll() -> void:
 	if is_rolling:
 		return
 	is_rolling = true
+	play_random_roll_sound()
 	position = default_postion
 	$Die1.modulate = unused_color
 	$Die1.play()
@@ -104,4 +106,49 @@ func set_color(is_black: bool) -> void:
 func _on_start_game() -> void:
 	# set white
 	set_color(false)
-	roll()
+	roll_for_first()
+	#roll()
+	
+func roll_for_first() -> void:
+	$Die1.animation = animation_names[0]
+	$Die2.animation = animation_names[1]
+	$Die3.hide()
+	$Die4.hide()
+	$AnimationPlayer.play("initial_rolls")
+	
+func roll_duel_values() -> void:
+	# to ensure we get different values, we choose value1 first
+	# and only then procede to choose value2, by selecting random value
+	# among 5 instead of 6, and shifting if neccessary
+	white_starting_roll = randi() % 6 + 1
+	black_starting_roll = randi() % 5 + 1
+	black_starting_roll = black_starting_roll if black_starting_roll < white_starting_roll else black_starting_roll + 1
+	
+
+func display_duel_results() -> void:
+	$Die1.frame = white_starting_roll - 1
+	$Die2.frame = black_starting_roll - 1
+	
+	var vfx: GPUParticles2D = fireworks_effect.instantiate()
+	add_child(vfx)
+	vfx.finished.connect(vfx.queue_free)
+	if white_starting_roll > black_starting_roll:
+		vfx.position = $Die1.position
+		vfx.set_purple()
+		SignalBus.set_starting_player.emit(false)
+	else:
+		vfx.position = $Die2.position
+		vfx.set_red()
+		SignalBus.set_starting_player.emit(true)
+	vfx.emitting = true
+	
+
+func convert_dice_colors() -> void:
+	if white_starting_roll > black_starting_roll:
+		$Die2.animation = animation_names[0]
+	else:
+		$Die1.animation = animation_names[1]
+	
+func play_random_roll_sound():
+	var selected_sound: AudioStreamPlayer = roll_sounds[randi() % 2]
+	selected_sound.play()

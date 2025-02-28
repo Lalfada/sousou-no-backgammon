@@ -15,6 +15,7 @@ func _process(delta: float) -> void:
 
 func _on_pressed() -> void:
 	SignalBus.open_menu.emit()
+	SignalBus.menu_pressed.emit()
 
 func _on_player_won(_winner_is_black: bool) -> void:
 	visible = true

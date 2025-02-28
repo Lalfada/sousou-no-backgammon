@@ -1,0 +1,94 @@
+[gd_scene load_steps=16 format=3 uid="uid://bk01mswju7xo2"]
+
+[ext_resource type="Script" path="res://board/duel_win_effect.gd" id="1_0y6c7"]
+
+[sub_resource type="Gradient" id="Gradient_37ggy"]
+offsets = PackedFloat32Array(0, 0.722543, 1)
+colors = PackedColorArray(0.410793, 0.000716186, 0.539022, 1, 0.903281, 0.607936, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_x0rti"]
+gradient = SubResource("Gradient_37ggy")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_o4h5r"]
+particle_flag_disable_z = true
+angle_min = -720.0
+angle_max = -720.0
+spread = 180.0
+initial_velocity_min = 105.48
+initial_velocity_max = 122.36
+damping_min = 100.0
+damping_max = 100.0
+color_ramp = SubResource("GradientTexture1D_x0rti")
+sub_emitter_mode = 1
+sub_emitter_frequency = 4.0
+
+[sub_resource type="Gradient" id="Gradient_b756b"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_0t3ka"]
+gradient = SubResource("Gradient_b756b")
+width = 4
+height = 4
+fill_from = Vector2(0, 0.542735)
+
+[sub_resource type="Gradient" id="Gradient_xmhgx"]
+offsets = PackedFloat32Array(0, 0.746341, 1)
+colors = PackedColorArray(0.44928, 0.1512, 0.54, 1, 0.850499, 0.496698, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_lyl7v"]
+gradient = SubResource("Gradient_xmhgx")
+
+[sub_resource type="Gradient" id="Gradient_q05vl"]
+offsets = PackedFloat32Array(0, 0.687805, 1)
+colors = PackedColorArray(0.63, 0.0945, 0, 1, 0.996343, 0.613755, 0.578418, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_0v5wc"]
+gradient = SubResource("Gradient_q05vl")
+
+[sub_resource type="Curve" id="Curve_w180h"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_rg8ou"]
+curve = SubResource("Curve_w180h")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_lhmtd"]
+particle_flag_disable_z = true
+gravity = Vector3(0, 0, 0)
+scale_min = 3.0
+scale_max = 4.0
+scale_curve = SubResource("CurveTexture_rg8ou")
+color = Color(0.99795, 0.883017, 1, 1)
+
+[sub_resource type="Gradient" id="Gradient_qm5or"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_fagag"]
+gradient = SubResource("Gradient_qm5or")
+width = 1
+
+[node name="DuelWinEffect" type="GPUParticles2D"]
+scale = Vector2(3, 3)
+emitting = false
+amount = 100
+sub_emitter = NodePath("TrailParticles")
+process_material = SubResource("ParticleProcessMaterial_o4h5r")
+texture = SubResource("GradientTexture2D_0t3ka")
+lifetime = 1.5
+one_shot = true
+speed_scale = 2.0
+explosiveness = 1.0
+trail_enabled = true
+trail_sections = 2
+script = ExtResource("1_0y6c7")
+purple_gradient = SubResource("GradientTexture1D_lyl7v")
+purple_trail = Color(0.99795, 0.883017, 1, 1)
+red_colors = SubResource("GradientTexture1D_0v5wc")
+red_trail = Color(1, 0.62097, 0.622937, 1)
+
+[node name="TrailParticles" type="GPUParticles2D" parent="."]
+position = Vector2(2, 0)
+amount = 200
+process_material = SubResource("ParticleProcessMaterial_lhmtd")
+texture = SubResource("GradientTexture1D_fagag")
+lifetime = 0.05

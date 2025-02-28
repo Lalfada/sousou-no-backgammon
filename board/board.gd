@@ -42,7 +42,7 @@ var all_moves: Array[Dictionary]
 # it represents the moves presented to the player
 var moves: Dictionary = {}
 var is_blacks_turn: bool = false
-var is_interactable: bool = true
+var is_interactable: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
@@ -66,6 +66,7 @@ func _ready() -> void:
 	SignalBus.new_turn.connect(_on_new_turn)
 	SignalBus.start_game.connect(_on_start_game)
 	SignalBus.set_play_mode.connect(_on_set_play_mode)
+	SignalBus.set_starting_player.connect(_on_set_starting_player)
 
 	
 	update_all()
@@ -174,8 +175,8 @@ func update_selection(tile_id: int) -> void:
 	moves = all_moves[tile_id].duplicate(true)
 	update_possible_moves(moves)
 
-func can_select_tile(tile_id: int) -> bool:
-	if tile_id == Utils.BLACK_BAR or tile_id == Utils.WHITE_BEAR_OFF:
+func can_select_tile(tile_id: int) -> bool:		
+	if tile_id == Utils.BLACK_BEAR_OFF or tile_id == Utils.WHITE_BEAR_OFF:
 		return false
 	
 	var checker_count = board_state[tile_id]
@@ -565,9 +566,9 @@ func animate_checker(move: Move) -> void:
 		await tween.finished  # Wait for each move to finish before next
 
 func _on_start_game() -> void:
-	#board_state = Utils.default_board.duplicate()
+	board_state = Utils.default_board.duplicate()
 	#board_state = Utils.endgame_board.duplicate()
-	board_state = Utils.done_board.duplicate()
+	#board_state = Utils.done_board.duplicate()
 	# we want white to go first
 	is_blacks_turn = false
 	is_interactable = true
@@ -580,3 +581,6 @@ func _on_start_game() -> void:
 
 func _on_set_play_mode(is_vs_ai: bool):
 	self.is_vs_ai = is_vs_ai
+
+func _on_set_starting_player(is_starting_player_black: bool) -> void:
+	is_blacks_turn = is_starting_player_black
