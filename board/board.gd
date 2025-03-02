@@ -216,7 +216,7 @@ func black_correct_leave(from: int, step: int) -> bool:
 		var j: int = 5 - i
 		if board_state[j] < 0:
 			max_dist = j + 1
-		break
+			break
 	return max_dist == distance or step == distance
 
 

@@ -19,30 +19,6 @@ scale = Vector2(1.28, 1.28)
 texture = ExtResource("2_iq1d5")
 flip_h = true
 
-[node name="Markers" type="Node2D" parent="."]
-visible = false
-
-[node name="BotLeftMarker" type="Marker2D" parent="Markers"]
-position = Vector2(67, 1012)
-
-[node name="Column6Marker" type="Marker2D" parent="Markers"]
-position = Vector2(686, 1019)
-
-[node name="Column7Marker" type="Marker2D" parent="Markers"]
-position = Vector2(846, 1011)
-
-[node name="TopMarker" type="Marker2D" parent="Markers"]
-position = Vector2(71, 62)
-
-[node name="HeightMarker" type="Marker2D" parent="Markers"]
-position = Vector2(66, 605)
-
-[node name="WhiteCaptured" type="Marker2D" parent="Markers"]
-position = Vector2(766, 626)
-
-[node name="BlackCaptured" type="Marker2D" parent="Markers"]
-position = Vector2(770, 473)
-
 [node name="CheckerManager" type="Node2D" parent="."]
 script = ExtResource("6_jimn5")
 checker_scene = ExtResource("2_7ler0")

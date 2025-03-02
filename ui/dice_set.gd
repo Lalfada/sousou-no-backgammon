@@ -106,6 +106,7 @@ func set_color(is_black: bool) -> void:
 func _on_start_game() -> void:
 	# set white
 	set_color(false)
+	unmodulate_dice()
 	roll_for_first()
 	#roll()
 	
@@ -152,3 +153,9 @@ func convert_dice_colors() -> void:
 func play_random_roll_sound():
 	var selected_sound: AudioStreamPlayer = roll_sounds[randi() % 2]
 	selected_sound.play()
+
+func unmodulate_dice() -> void:
+	$Die1.modulate = unused_color
+	$Die2.modulate = unused_color
+	$Die3.modulate = unused_color
+	$Die4.modulate = unused_color
