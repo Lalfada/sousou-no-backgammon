@@ -145,9 +145,9 @@ func display_duel_results() -> void:
 
 func convert_dice_colors() -> void:
 	if white_starting_roll > black_starting_roll:
-		$Die2.animation = animation_names[0]
+		set_color(false)
 	else:
-		$Die1.animation = animation_names[1]
+		set_color(true)
 	
 func play_random_roll_sound():
 	var selected_sound: AudioStreamPlayer = roll_sounds[randi() % 2]

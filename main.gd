@@ -17,7 +17,6 @@ func _ready() -> void:
 	
 	#$Board.scale = Vector2(window_size.x / project_window_size.x,\
 		#window_size.y / project_window_size.y)
-	$Board.update_graphics()
 	
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
